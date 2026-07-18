@@ -1,0 +1,35 @@
+{
+  "repository_type": "multi-part",
+  "parts": [
+    {
+      "part_id": "frontend",
+      "project_type_id": "web",
+      "display_name": "Frontend (React/Vite)",
+      "root_path": "frontend",
+      "entry_points": ["frontend/src/main.tsx"],
+      "architecture_doc": "architecture-frontend.md"
+    },
+    {
+      "part_id": "backend",
+      "project_type_id": "backend",
+      "display_name": "Backend (Spring Boot)",
+      "root_path": "backend",
+      "entry_points": ["backend/src/main/java/com/bmad/todolist/TodolistApplication.java"],
+      "architecture_doc": "architecture-backend.md"
+    }
+  ],
+  "integration_points": [
+    {
+      "from": "frontend",
+      "to": "backend",
+      "type": "REST API",
+      "details": "JSON over /api with Bearer JWT; Vite/nginx proxy"
+    },
+    {
+      "from": "backend",
+      "to": "postgresql",
+      "type": "JDBC/JPA",
+      "details": "Flyway migrations V1–V2"
+    }
+  ]
+}
