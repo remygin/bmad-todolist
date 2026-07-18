@@ -12,6 +12,11 @@ node_modules/
 dist/
 build/
 out/
+target/
+*.class
+*.jar
+!**/maven-wrapper.jar
+*.war
 .next/
 .nuxt/
 .turbo/

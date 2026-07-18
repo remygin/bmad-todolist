@@ -1,0 +1,536 @@
+.centered,
+.board-state {
+  min-height: 14rem;
+  display: grid;
+  place-items: center;
+  color: #64748b;
+}
+
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+}
+
+.auth-card {
+  width: min(100%, 380px);
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.1);
+}
+
+.auth-card h1,
+.board-toolbar h1,
+.empty-state h1 {
+  margin: 0;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.86rem;
+  font-weight: 650;
+}
+
+input,
+textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  padding: 0.65rem 0.75rem;
+  color: #0f172a;
+  background: #fff;
+}
+
+textarea {
+  resize: vertical;
+}
+
+input:focus,
+textarea:focus,
+button:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.22);
+  outline-offset: 1px;
+}
+
+button {
+  border: 0;
+  border-radius: 9px;
+  padding: 0.62rem 0.9rem;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.button-quiet {
+  color: #334155;
+  background: #e2e8f0;
+}
+
+.button-danger {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.button-link {
+  padding: 0;
+  color: #2563eb;
+  background: transparent;
+  font-size: 0.8rem;
+}
+
+.button-link.danger {
+  color: #b91c1c;
+}
+
+.muted {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.error,
+.form-error {
+  margin: 0;
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.86rem;
+}
+
+.shell {
+  min-height: 100vh;
+}
+
+.shell-header {
+  min-height: 72px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1.4rem;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.shell-header > div:first-child,
+.shell-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.brand-mark {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  border-radius: 11px;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.shell-header h1 {
+  margin: 0;
+  font-size: 1.12rem;
+}
+
+.shell-user button {
+  background: #0f172a;
+}
+
+.shell-main {
+  min-height: calc(100vh - 72px);
+}
+
+.boards-page {
+  min-height: calc(100vh - 72px);
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr);
+}
+
+.board-sidebar {
+  padding: 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  background: #fff;
+  border-right: 1px solid #e2e8f0;
+}
+
+.board-sidebar h2 {
+  margin: 0 0 0.2rem;
+  font-size: 1rem;
+}
+
+.board-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.board-list button {
+  width: 100%;
+  overflow: hidden;
+  color: #475569;
+  background: transparent;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.board-list button:hover,
+.board-list button.active {
+  color: #1d4ed8;
+  background: #eff6ff;
+}
+
+.new-board-form {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.board-workspace {
+  min-width: 0;
+  padding: 1.3rem;
+}
+
+.board-error {
+  margin-bottom: 1rem;
+}
+
+.board-toolbar,
+.settings-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.board-toolbar {
+  margin-bottom: 1.1rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.2rem;
+  color: #2563eb;
+  font-size: 0.75rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.toolbar-actions,
+.form-actions,
+.card-actions,
+.order-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.column-settings {
+  margin-bottom: 1.1rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  background: #fff;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+}
+
+.column-settings h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.settings-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.settings-row {
+  display: flex;
+  align-items: end;
+  gap: 0.4rem;
+}
+
+.settings-row label {
+  flex: 1;
+}
+
+.settings-row label span {
+  color: #64748b;
+  font-size: 0.68rem;
+}
+
+.order-buttons button {
+  padding-inline: 0.65rem;
+}
+
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(250px, 1fr));
+  align-items: start;
+  gap: 1rem;
+}
+
+.kanban-column {
+  min-height: 360px;
+  padding: 0.85rem;
+  background: #e9eef5;
+  border: 2px solid transparent;
+  border-radius: 14px;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.kanban-column.is-over {
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
+
+.column-header,
+.card-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.column-header {
+  margin-bottom: 0.75rem;
+}
+
+.column-header h2 {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.count-badge {
+  min-width: 1.6rem;
+  padding: 0.12rem 0.45rem;
+  color: #475569;
+  background: #fff;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.card-list {
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.column-empty {
+  margin: 1rem 0;
+  color: #94a3b8;
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.kanban-card {
+  padding: 0.85rem;
+  background: #fff;
+  border: 1px solid #dbe2ea;
+  border-radius: 11px;
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.05);
+}
+
+.kanban-card.is-dragging {
+  z-index: 10;
+  opacity: 0.62;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.18);
+}
+
+.kanban-card h3 {
+  margin: 0;
+  font-size: 0.92rem;
+  overflow-wrap: anywhere;
+}
+
+.kanban-card > p:not(.form-error) {
+  margin: 0.5rem 0 0;
+  color: #64748b;
+  font-size: 0.82rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.drag-handle {
+  flex: 0 0 auto;
+  padding: 0.15rem 0.35rem;
+  color: #64748b;
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.card-actions {
+  margin-top: 0.75rem;
+}
+
+.add-card-button {
+  width: 100%;
+  margin-top: 0.75rem;
+  color: #475569;
+  background: transparent;
+  border: 1px dashed #aebccd;
+}
+
+.add-card-button:hover {
+  color: #1d4ed8;
+  background: #fff;
+}
+
+.card-form {
+  margin-top: 0.7rem;
+  padding: 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  background: #fff;
+  border-radius: 10px;
+}
+
+.kanban-card .card-form {
+  margin: 0;
+  padding: 0;
+}
+
+.empty-state {
+  min-height: 55vh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  color: #64748b;
+  text-align: center;
+}
+
+.empty-state p {
+  max-width: 420px;
+}
+
+.empty-icon {
+  width: 58px;
+  height: 58px;
+  margin-bottom: 0.8rem;
+  display: grid;
+  place-items: center;
+  color: #2563eb;
+  background: #dbeafe;
+  border-radius: 16px;
+  font-size: 1.7rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 900px) {
+  .kanban-board {
+    grid-template-columns: repeat(3, minmax(280px, 82vw));
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding-bottom: 0.7rem;
+  }
+
+  .kanban-column {
+    scroll-snap-align: start;
+  }
+
+  .settings-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .shell-header {
+    align-items: flex-start;
+    padding: 0.75rem;
+  }
+
+  .shell-header .muted,
+  .shell-user span {
+    display: none;
+  }
+
+  .boards-page {
+    display: block;
+  }
+
+  .board-sidebar {
+    padding: 0.75rem;
+    border-right: 0;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .board-sidebar > div:first-child {
+    display: none;
+  }
+
+  .board-list {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .board-list button {
+    width: auto;
+    flex: 0 0 auto;
+  }
+
+  .new-board-form {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+
+  .board-workspace {
+    padding: 0.85rem;
+  }
+
+  .board-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .toolbar-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+}
