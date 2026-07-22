@@ -137,8 +137,8 @@ class V3MigrationIntegrationTest {
 	@Sql(scripts = "/sql/seed-pre-v3.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 	void v3Migration_assigneeIdNullableInsertWorks() {
 		jdbc.update(
-				"INSERT INTO cards (title, board_id, status, position, creator_id, created_at, updated_at) " +
-				"VALUES ('Nullable test', 10, 'TODO', 5, 10, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)");
+				"INSERT INTO cards (id, title, board_id, status, position, creator_id, created_at, updated_at) " +
+				"VALUES (100, 'Nullable test', 10, 'TODO', 5, 10, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)");
 		int count = jdbc.queryForObject(
 				"SELECT COUNT(*) FROM cards WHERE title = 'Nullable test' AND assignee_id IS NULL",
 				Integer.class);

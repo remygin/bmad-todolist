@@ -18,7 +18,6 @@ import com.bmad.todolist.user.RoleRepository;
 import com.bmad.todolist.user.User;
 import com.bmad.todolist.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -155,7 +154,6 @@ class KanbanIntegrationTest {
 	}
 
 	@Test
-	@Disabled("V3 migration adds NOT NULL on creator_id; Card entity field arrives in Story 4.2")
 	void cardCrudAndMoveNormalizeStablePositions() throws Exception {
 		long boardId = createBoard("Delivery");
 		long first = createCard(boardId, "First", "TODO");
@@ -198,7 +196,6 @@ class KanbanIntegrationTest {
 	}
 
 	@Test
-	@Disabled("V3 migration adds NOT NULL on creator_id; Card entity field arrives in Story 4.2")
 	void invalidMoveDoesNotChangePersistedOrder() throws Exception {
 		long boardId = createBoard("Atomic");
 		long first = createCard(boardId, "First", "TODO");
@@ -216,7 +213,6 @@ class KanbanIntegrationTest {
 	}
 
 	@Test
-	@Disabled("V3 migration adds NOT NULL on creator_id; Card entity field arrives in Story 4.2")
 	void deletingBoardCascadesColumnsAndCards() throws Exception {
 		long boardId = createBoard("Disposable");
 		long cardId = createCard(boardId, "Remove me", "TODO");
@@ -232,7 +228,6 @@ class KanbanIntegrationTest {
 	}
 
 	@Test
-	@Disabled("V3 migration adds NOT NULL on creator_id; Card entity field arrives in Story 4.2")
 	void resourcesOwnedByAnotherAdminAreHidden() throws Exception {
 		long boardId = createBoard("Private");
 		long cardId = createCard(boardId, "Secret", "TODO");

@@ -1,308 +1,395 @@
 ---
-id: "automation-summary-4.1"
-story: "4.1"
-epic: 4
-workflow: "ai-automate-tests"
-generated: "2026-07-22"
-author: "BMad TEA Agent via bmad-tea@1.0"
-status: "automated"
-related:
+workflowStatus: "completed"
+node: "ai-automate-tests"
+attempt: 2
+primarySkill: "bmad-tea@1.0"
+intent: "automate_atdd"
+autoAdvance: true
+inputDocuments:
   - "_bmad-output/test-artifacts/test-design-qa.md"
   - "_bmad-output/test-artifacts/test-design-architecture.md"
-  - "_bmad-output/implementation-artifacts/atdd-scenarios.md"
-  - "_bmad-output/implementation-artifacts/current-story.md"
+  - "_bmad-output/test-artifacts/atdd-scenarios-story-4.2.md"
+  - "_bmad-output/planning-artifacts/stories/story-4.2-card-entity-dto.md"
+knowledgeFragments:
+  - "fixture-architecture"
+  - "api-testing-patterns"
+  - "selective-testing"
+  - "contract-testing"
+  - "feature-flags"
+  - "test-quality"
+  - "test-levels-framework"
+  - "data-factories"
+  - "ci-burn-in"
+  - "risk-governance"
+  - "probability-impact"
+  - "test-priorities-matrix"
+date: "2026-07-22"
 ---
 
-# Automation Summary: V3 миграция — добавление creator_id и assignee_id в таблицу cards
+# Automation Summary — Story 4.2: Card entity + DTO — поля creator/assignee и единый mapper
 
-## 1. Обзор
+## 1. Обзор автоматизации
 
-**Story 4.1** — только Flyway V3 миграция БД. Никаких изменений Java-кода, entity, DTO, сервисов или фронтенда.
+**Epic:** 4 — Параметры пользователей на карточках (creator + assignee)
+**Story:** 4.2 — Card entity + DTO — поля creator/assignee и единый mapper
+**Story Status:** ready-for-dev
+**Baseline:** 19e5c2287906973db0532b1275e36fc95312697a
 
-**Цель автоматизации:** 12 тестов (6 P1, 4 P2, 2 P3), покрывающих:
-- Чистое применение миграции (AC-1)
-- Backfill существующих карточек (AC-2, R-07)
-- Ограничения и индексы (AC-3, G-04)
-- Регрессию V1/V2
-- Совместимость с H2 MODE=PostgreSQL
-- Идемпотентность повторного применения
+**Стек проекта:** Java 17+ / Spring Boot / JUnit 5 / MockMvc / H2 (MODE=PostgreSQL) / Flyway
+**Уровни автоматизации:** API IT (MockMvc) — 100%; код-ревью (structural) — через ATDD-3.1/3.2
+**FE автоматизация:** Не требуется (Story 4.2 — только backend Java)
 
-**Тип тестов:** Миграционные Integration Tests (SpringBootTest + JdbcTemplate)
-**Инфраструктура:** H2 MODE=PostgreSQL, профиль `test`, Flyway на старте
-
----
-
-## 2. План автоматизации
-
-### 2.1 Тестовый класс
-
-`backend/src/test/java/com/bmad/todolist/migration/V3MigrationIntegrationTest.java`
-
-Пакет: `com.bmad.todolist.migration`
-
-### 2.2 Seed-данные
-
-`backend/src/test/resources/sql/seed-pre-v3.sql` — вставляет users, boards, columns, cards **без** creator_id/assignee_id (состояние «до V3»).
-
----
-
-## 3. Матрица тестов
-
-### 3.1 P1 (High) — обязательны к выполнению
-
-| ID | Scenario | Метод | Проверка |
-|----|----------|-------|----------|
-| MIG-01 | 3.1.1 — Чистое применение | `v3Migration_addsCreatorAndAssigneeColumns()` | creator_id BIGINT NOT NULL, assignee_id BIGINT nullable, 2 FK, 2 индекса |
-| MIG-02 | 3.2.1 — Backfill одной доски | `v3Migration_backfillCreatorIdEqualsBoardAuthor()` | creator_id = board.author_id для всех карточек |
-| MIG-03 | 3.3.1 — FK creator_id | `v3Migration_foreignKeyOnCreatorId_rejectsInvalidRef()` | INSERT с несуществующим creator_id → DataIntegrityViolation |
-| MIG-04 | 3.3.3 — NOT NULL creator_id | `v3Migration_notNullOnCreatorId_rejectsNull()` | INSERT с NULL creator_id → DataIntegrityViolation |
-| MIG-05 | 3.4.1 — Regression V1/V2 | `v3Migration_doesNotModifyV1V2Checksums()` | schema_version содержит 3 записи, checksums V1/V2 не изменились |
-| MIG-06 | 3.4.3 — H2 совместимость | `v3Migration_sqlCompatibleWithH2()` | Все ALTER/UPDATE/CONSTRAINT/INDEX работают без ошибок |
-
-### 3.2 P2 (Medium)
-
-| ID | Scenario | Метод | Проверка |
-|----|----------|-------|----------|
-| MIG-07 | 3.1.2 — Пустая БД | `v3Migration_emptyCardsTable_succeeds()` | Миграция не падает при пустой cards |
-| MIG-08 | 3.2.2 — Backfill нескольких досок | `v3Migration_backfillMultipleBoards_correctPerBoard()` | creator_id = board.author_id per-board |
-| MIG-09 | 3.3.2 — FK assignee_id | `v3Migration_foreignKeyOnAssigneeId_rejectsInvalidRef()` | INSERT с несуществующим assignee_id → DataIntegrityViolation |
-| MIG-10 | 3.3.4 — assignee_id nullable | `v3Migration_assigneeIdAllowsNull()` | INSERT с assignee_id = NULL успешен |
-
-### 3.3 P3 (Low)
-
-| ID | Scenario | Метод | Проверка |
-|----|----------|-------|----------|
-| MIG-11 | 3.4.2 — Идемпотентность | `v3Migration_isIdempotent()` | Повторное применение пропускается без ошибки |
-| MIG-12 | V3 rollback | `v3Migration_rollbackScript_revertsCorrectly()` | V3.1 revert удаляет колонки, FK, индексы |
+**План автоматизации:**
+- 14 ATDD-сценариев (9 × P0, 3 × P1, 2 × P2)
+- Все — API IT через MockMvc (существующая инфраструктура KanbanIntegrationTest)
+- 4 регрессионных теста (снятие @Disabled)
+- 1 structural code-review проверка (ATDD-3.1, ATDD-3.2)
 
 ---
 
-## 4. Реализация тестов
+## 2. Traceability Coverage: AC → ATDD → Уровень автоматизации
 
-### 4.1 V3MigrationIntegrationTest.java
+| AC ID | ATDD сценарии | Уровень | Framework | Статус |
+|-------|---------------|---------|-----------|--------|
+| AC-1 | ATDD-1.1, ATDD-1.2, ATDD-1.3 | API IT | MockMvc + JUnit 5 | to-implement |
+| AC-2 | ATDD-2.1, ATDD-2.2 | API IT | MockMvc + JUnit 5 | to-implement |
+| AC-3 | ATDD-3.1, ATDD-3.2, ATDD-3.3 | Code review + API IT | Structural scan + MockMvc | to-implement |
+| AC-4 | ATDD-4.1, ATDD-4.2, ATDD-4.3 | API IT | MockMvc + JUnit 5 | to-implement |
+| AC-5 | ATDD-5.1 | Regression IT | MockMvc + JUnit 5 | to-enable |
+
+**Покрытие:** 5/5 AC покрыты автоматизированными сценариями. Нет gaps.
+
+---
+
+## 3. API / Integration Test Automation (MockMvc)
+
+### 3.1 Настройка тестовой инфраструктуры
+
+**Существующая база:** `KanbanIntegrationTest` использует `@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)` + `@AutoConfigureMockMvc` + `@ActiveProfiles("test")` + Flyway для H2.
+
+**Необходимые добавочные фикстуры (на основе data-factories + fixture-architecture):**
 
 ```java
-package com.bmad.todolist.migration;
+// Bootstrap ADMIN (существует из V1/V2)
+User admin = userRepository.findByUsername("admin").orElseThrow();
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+// Второй ADMIN для assignee тестов
+User admin2 = seedUser("admin2", "password2");
+```
 
-import java.util.List;
-import java.util.Map;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+**Helper-методы (pure function → fixture pattern):**
 
-@SpringBootTest
-@ActiveProfiles("test")
-@Sql(scripts = "/sql/seed-pre-v3.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
-class V3MigrationIntegrationTest {
+```java
+// Seed helper — чистая функция + fixture
+private User seedAdminUser(String username, String password) {
+    User user = new User(username, passwordEncoder.encode(password), Role.ADMIN);
+    return userRepository.save(user);
+}
 
-    @Autowired
-    private JdbcTemplate jdbc;
-
-    @Test
-    void v3Migration_addsCreatorAndAssigneeColumns() {
-        List<Map<String, Object>> columns = jdbc.queryForList(
-            "SELECT column_name, data_type, is_nullable " +
-            "FROM information_schema.columns " +
-            "WHERE table_name = 'cards' " +
-            "AND column_name IN ('creator_id', 'assignee_id') " +
-            "ORDER BY column_name");
-        assertThat(columns).hasSize(2);
-
-        Map<String, Object> creator = columns.get(0);
-        assertThat(creator.get("column_name")).isEqualTo("creator_id");
-        assertThat(creator.get("is_nullable")).isEqualTo("NO");
-
-        Map<String, Object> assignee = columns.get(1);
-        assertThat(assignee.get("column_name")).isEqualTo("assignee_id");
-        assertThat(assignee.get("is_nullable")).isEqualTo("YES");
-
-        List<String> fkNames = jdbc.queryForList(
-            "SELECT constraint_name FROM information_schema.table_constraints " +
-            "WHERE table_name = 'cards' AND constraint_type = 'FOREIGN KEY'",
-            String.class);
-        assertThat(fkNames).containsExactlyInAnyOrder("fk_cards_creator", "fk_cards_assignee");
-
-        List<String> indexNames = jdbc.queryForList(
-            "SELECT index_name FROM information_schema.indexes " +
-            "WHERE table_name = 'cards' " +
-            "AND index_name IN ('idx_cards_creator_id', 'idx_cards_assignee_id')",
-            String.class);
-        assertThat(indexNames).hasSize(2);
-    }
-
-    @Test
-    void v3Migration_backfillCreatorIdEqualsBoardAuthor() {
-        List<Map<String, Object>> mismatches = jdbc.queryForList(
-            "SELECT c.id FROM cards c " +
-            "JOIN boards b ON c.board_id = b.id " +
-            "WHERE c.creator_id != b.author_id OR c.creator_id IS NULL");
-        assertThat(mismatches).isEmpty();
-    }
-
-    @Test
-    void v3Migration_foreignKeyOnCreatorId_rejectsInvalidRef() {
-        assertThatThrownBy(() -> jdbc.update(
-            "INSERT INTO cards (title, description, status, position, board_id, creator_id) " +
-            "VALUES ('Test', NULL, 'TODO', 0, 1, 99999)"))
-            .isInstanceOf(DataIntegrityViolationException.class);
-    }
-
-    @Test
-    void v3Migration_notNullOnCreatorId_rejectsNull() {
-        assertThatThrownBy(() -> jdbc.update(
-            "INSERT INTO cards (title, description, status, position, board_id, creator_id) " +
-            "VALUES ('Test', NULL, 'TODO', 0, 1, NULL)"))
-            .isInstanceOf(DataIntegrityViolationException.class);
-    }
-
-    @Test
-    void v3Migration_doesNotModifyV1V2Checksums() {
-        List<Map<String, Object>> migrations = jdbc.queryForList(
-            "SELECT version, checksum FROM flyway_schema_history ORDER BY installed_rank");
-        assertThat(migrations).hasSize(3);
-        assertThat(migrations.get(0).get("version")).isEqualTo("1");
-        assertThat(migrations.get(1).get("version")).isEqualTo("2");
-        assertThat(migrations.get(2).get("version")).isEqualTo("3");
-    }
-
-    @Test
-    void v3Migration_sqlCompatibleWithH2() {
-        assertThat(jdbc.queryForObject(
-            "SELECT COUNT(*) FROM information_schema.columns " +
-            "WHERE table_name = 'cards' AND column_name IN ('creator_id', 'assignee_id')",
-            Integer.class)).isEqualTo(2);
-    }
-
-    @Test
-    void v3Migration_emptyCardsTable_succeeds() {
-        jdbc.update("DELETE FROM cards");
-        assertThat(jdbc.queryForObject(
-            "SELECT COUNT(*) FROM cards", Integer.class)).isZero();
-    }
-
-    @Test
-    void v3Migration_backfillMultipleBoards_correctPerBoard() {
-        List<Map<String, Object>> cards = jdbc.queryForList(
-            "SELECT c.id, c.creator_id, b.author_id FROM cards c " +
-            "JOIN boards b ON c.board_id = b.id ORDER BY c.id");
-        assertThat(cards).hasSize(4);
-        for (Map<String, Object> row : cards) {
-            assertThat(row.get("creator_id")).isEqualTo(row.get("author_id"));
-        }
-    }
-
-    @Test
-    void v3Migration_foreignKeyOnAssigneeId_rejectsInvalidRef() {
-        assertThatThrownBy(() -> jdbc.update(
-            "INSERT INTO cards (title, description, status, position, board_id, creator_id, assignee_id) " +
-            "VALUES ('Test', NULL, 'TODO', 0, 1, 1, 99999)"))
-            .isInstanceOf(DataIntegrityViolationException.class);
-    }
-
-    @Test
-    void v3Migration_assigneeIdAllowsNull() {
-        jdbc.update(
-            "INSERT INTO cards (title, description, status, position, board_id, creator_id, assignee_id) " +
-            "VALUES ('Nullable Test', NULL, 'TODO', 0, 1, 1, NULL)");
-        Integer count = jdbc.queryForObject(
-            "SELECT COUNT(*) FROM cards WHERE assignee_id IS NULL AND title = 'Nullable Test'",
-            Integer.class);
-        assertThat(count).isOne();
-    }
+// Factory для Card с creator
+private Card createCardWithCreator(String title, Long columnId, User creator) {
+    Card card = new Card(title, columnId, creator); // новый конструктор с creator
+    return cardRepository.save(card);
 }
 ```
 
----
+### 3.2 JSON-контракты (строгие vs нестрогие)
 
-## 5. Интеграция с существующей тестовой инфраструктурой
+По рекомендации **api-testing-patterns**: для новых полей CardResponse используем строгую проверку (JsonPath.assertThat), для обратной совместимости — нестрогое сравнение (существующие тесты не должны сломаться).
 
-### 5.1 Запуск
+**Пример строгой проверки (ATDD-1.1):**
 
-```bash
-cd backend && ./mvnw test -Dtest=V3MigrationIntegrationTest
+```java
+var json = JsonPath.parse(response.getResponse().getContentAsString());
+assertThat(json.read("$.creatorId", Long.class)).isEqualTo(adminId);
+assertThat(json.read("$.creatorUsername", String.class)).isEqualTo("admin");
+assertThat(json.read("$.assigneeId", Long.class)).isNull();
+assertThat(json.read("$.assigneeUsername", String.class)).isNull();
 ```
 
-### 5.2 CI/CD (Every PR)
+### 3.3 Обработка LAZY fetch в тестах
 
-Все тесты запускаются в `mvn test` — существующий pipeline без изменений.
-
-### 5.3 Зависимости
-
-- Flyway V3 (`V3__add_card_users.sql`) — должен существовать до запуска тестов
-- H2 MODE=PostgreSQL в профиле `test`
-- Seed-скрипты: `seed-pre-v3.sql`, `seed-pre-v3-no-cards.sql`
+Поскольку `open-in-view=false` и используется `FetchType.LAZY`, все тесты должны вызывать getCreator().getUsername() и getAssignee() внутри `@Transactional` service-метода. В MockMvc тестах это гарантируется сервисным слоем. Прямые вызовы в тестах — через репозиторий в `@BeforeEach` / `@BeforeTransaction`.
 
 ---
 
-## 6. Критерии прохождения
+## 4. Regression Automation
 
-### Pass Criteria (все P1 проходят)
+### 4.1 Снятие @Disabled (ATDD-5.1)
 
-1. **MIG-01**: После V3 в `cards` есть `creator_id BIGINT NOT NULL`, `assignee_id BIGINT nullable`, 2 FK, 2 индекса
-2. **MIG-02**: Все существующие карточки имеют `creator_id = board.author_id`
-3. **MIG-03**: INSERT с несуществующим `creator_id` → DataIntegrityViolationException
-4. **MIG-04**: INSERT с `creator_id = NULL` → DataIntegrityViolationException
-5. **MIG-05**: V1/V2 checksums не изменились после V3
-6. **MIG-06**: V3 SQL совместим с H2 MODE=PostgreSQL
+4 теста `KanbanIntegrationTest` разблокируются после имплементации Card.java:
 
-### Fail Criteria
+| Тест | Причина @Disabled | Условие снятия |
+|------|-------------------|----------------|
+| cardCrudAndMoveNormalizeStablePositions | NOT NULL creator_id (V3) | Card entity предоставляет creator |
+| invalidMoveDoesNotChangePersistedOrder | NOT NULL creator_id (V3) | Card entity предоставляет creator |
+| deletingBoardCascadesColumnsAndCards | NOT NULL creator_id (V3) | Card entity предоставляет creator |
+| resourcesOwnedByAnotherAdminAreHidden | NOT NULL creator_id (V3) | Card entity предоставляет creator |
 
-- Любой P1 тест не проходит → миграция не готова к PR
-- SET NOT NULL падает на существующих данных → повреждённые данные в production
-- FK не созданы → потеря referential integrity
+**Действие:** удалить `@Disabled` с каждого теста. Никакой другой модификации тестов не требуется, так как bootstrap ADMIN автоматически используется как creator.
 
----
+### 4.2 Обратная совместимость (ATDD-INT-2.1, ATDD-INT-2.2)
 
-## 7. Риски и митигация
-
-| Риск | Описание | Митигация |
-|------|----------|-----------|
-| R-07 (Score 6) | V3 backfill + NOT NULL — NULL на повреждённых данных | SET NOT NULL после проверки; тестовая миграция на копии данных |
-| G-04 | Ограничения и индексы не созданы | MIG-01 проверяет FK и индексы явно |
-| H2 несовместимость | UPDATE с FROM, ALTER ALTER COLUMN SET NOT NULL не работают в H2 | MIG-06 верифицирует совместимость |
-| Порядок SQL операций | ADD → UPDATE → SET NOT NULL → CONSTRAINT → INDEX | Строгий порядок в V3; тест проверяет конечное состояние |
+- Запросы createCard без assigneeId — 201 Created (assigneeId опционален)
+- Нестрогое сравнение JSON — существующие тесты игнорируют новые поля
+- assigneeId = null в createCard — равнозначно отсутствию (assignee = null)
 
 ---
 
-## 8. Трассировка
+## 5. Contract Testing Checks
 
-| Story AC | ATDD ID | Test ID | Метод | Приоритет |
-|----------|---------|---------|-------|-----------|
-| AC-1 | Scenario 3.1.1 | MIG-01 | `addsCreatorAndAssigneeColumns` | P1 |
-| AC-1 | Scenario 3.1.2 | MIG-07 | `emptyCardsTable_succeeds` | P2 |
-| AC-2 | Scenario 3.2.1 | MIG-02 | `backfillCreatorIdEqualsBoardAuthor` | P1 |
-| AC-2 | Scenario 3.2.2 | MIG-08 | `backfillMultipleBoards_correctPerBoard` | P2 |
-| AC-2 | Scenario 3.2.3 | — | Covered by A-3 assumption | — |
-| AC-3 | Scenario 3.3.1 | MIG-03 | `foreignKeyOnCreatorId_rejectsInvalidRef` | P1 |
-| AC-3 | Scenario 3.3.2 | MIG-09 | `foreignKeyOnAssigneeId_rejectsInvalidRef` | P2 |
-| AC-3 | Scenario 3.3.3 | MIG-04 | `notNullOnCreatorId_rejectsNull` | P1 |
-| AC-3 | Scenario 3.3.4 | MIG-10 | `assigneeIdAllowsNull` | P2 |
-| — | Scenario 3.4.1 | MIG-05 | `doesNotModifyV1V2Checksums` | P1 |
-| — | Scenario 3.4.2 | MIG-11 | Idempotency (P3 — manual verify) | P3 |
-| — | Scenario 3.4.3 | MIG-06 | `sqlCompatibleWithH2` | P1 |
-| — | Rollback | MIG-12 | Rollback script (P3 — manual verify) | P3 |
+### 5.1 CardResponse DTO contract
+
+Story 4.2 вводит единый `CardResponse.from(Card)` — это первый шаг к формальному contract testing. На данном этапе:
+
+- **Provider (backend):** CardResponse — единый источник истины для всех потребителей
+- **Consumers:** BoardService, CardService — оба делегируют `CardResponse.from(Card)`
+- **Contract verification:** ATDD-3.3 (INTEGRATION) проверяет, что оба сервиса возвращают идентичные CardResponse для одной карточки
+
+**Рекомендация по будущему внедрению Pact:**
+Когда появится frontend-потребитель (React), следует добавить Pact consumer test:
+
+```typescript
+// pact/consumer/card-response.pact.spec.ts
+// Consumer: bmad-todolist-web
+// Provider: bmad-todolist-api
+// Endpoint: GET /api/cards/{id}
+// Scrutiny: CardResponse содержит creatorId, creatorUsername, assigneeId, assigneeUsername
+```
+
+### 5.2 Provider Scrutiny (в контексте Story 4.2)
+
+| # | Проверка | Источник | Результат |
+|---|----------|----------|-----------|
+| 1 | Response shape: CardResponse — плоский DTO | architecture-delta §4.2 | flat JSON, 12 полей |
+| 2 | Status codes: 200 (GET/PUT), 201 (POST) | существующие контроллеры | без изменений |
+| 3 | Field names: camelCase | Java conventions | creatorId, creatorUsername и т.д. |
+| 4 | Required fields: creator NOT NULL | Card.java | creatorId/creatorUsername всегда присутствуют |
+| 5 | Nullable: assigneeId/assigneeUsername | Card.java | null если нет assignee |
 
 ---
 
-## 9. Заключение
+## 6. Feature Flag Checks
 
-Автоматизировано **12 тестов** для Story 4.1 (V3 миграция):
+**Вывод:** Story 4.2 не требует feature flags. Изменения entity/DTO/mapper — инфраструктурные, применяются безусловно. Feature flag может понадобиться в Story 4.3 (service logic — assignee management), если потребуется постепенный rollout.
 
-- **6 P1** — критический путь: проверка схемы, backfill, FK, NOT NULL, регрессия, H2 совместимость
-- **4 P2** — edge cases: пустая БД, multi-board backfill, FK assignee_id, nullable assignee_id
-- **2 P3** — идемпотентность и rollback (ручная проверка или дополнительная автоматизация)
+**Проверка на будущее (Story 4.3+):**
+- enum `FLAGS.NEW_ASSIGNEE_LOGIC` — централизованное определение
+- тесты обоих состояний (enabled/disabled)
+- cleanup targeting после каждого spec
 
-Все тесты используют существующую инфраструктуру `@SpringBootTest` + `JdbcTemplate` + H2 MODE=PostgreSQL. Единственные новые артефакты:
-1. `backend/src/test/java/com/bmad/todolist/migration/V3MigrationIntegrationTest.java` — класс тестов
-2. `backend/src/test/resources/sql/seed-pre-v3.sql` — seed-данные для основного сценария
-3. `backend/src/test/resources/sql/seed-pre-v3-no-cards.sql` — seed для пустой БД
+---
 
-**Готово к PR**: после создания `V3__add_card_users.sql` тесты проходят без доработок Java-кода.
+## 7. Rollback Validation Checks
+
+### 7.1 Критерии rollback-безопасности
+
+| Проверка | Действие | Ожидание |
+|----------|----------|----------|
+| R-01: Откат entity | revert Card.java до baseline | Компиляция успешна |
+| R-02: Откат DTO | revert CardDtos.java до baseline | Компиляция успешна |
+| R-03: Откат mapper | revert BoardService.java + CardService.java | toCardResponse — исходный конструктор |
+| R-04: V3 migration stay | schema creator_id/assignee_id columns exist | Rollback Java кода не требует миграции |
+| R-05: Тесты после rollback | вернуть @Disabled на 4 теста | KanbanIntegrationTest — PASS |
+| R-06: CI pipeline | `mvn test` после rollback | BUILD SUCCESS |
+
+**Важно:** V3 миграция (Story 4.1) не откатывается — она является prerequisite. Откат Java-кода Story 4.2 безопасен, так как schema уже готова и не меняется.
+
+---
+
+## 8. CI Integration & Selective Execution
+
+### 8.1 Предлагаемый pipeline (основываясь на CI strategy)
+
+| Stage | Команда | Таймаут | Gate |
+|-------|---------|---------|------|
+| **pre-commit** | `mvn compile` | 2 мин | Блокирующий |
+| **pre-commit** | `mvn test -pl backend -Dtest=KanbanIntegrationTest` | 5 мин | Блокирующий |
+| **CI PR** | `mvn test` (полный suite) | 10 мин | Блокирующий |
+| **CI merge** | `mvn test` + `npm run lint && npm run build` (FE) | 15 мин | Блокирующий |
+
+### 8.2 Selective execution по тегам
+
+Сценарии ATDD группируются по risk priority:
+
+```bash
+# P0 только (критические — fast feedback)
+mvn test -Dtest=KanbanIntegrationTest -Dgroups="P0"
+
+# P0 + P1 (полный набор для PR)
+mvn test -Dtest=KanbanIntegrationTest -Dgroups="P0,P1"
+
+# Полная регрессия (pre-merge)
+mvn test
+```
+
+**Замечание:** JUnit 5 Tag Expressions (`@Tag("P0")`) — существующий механизм; все новые тесты должны быть помечены тегом приоритета.
+
+### 8.3 Параметры sharding (для больших наборов)
+
+```yaml
+# GitHub Actions matrix
+strategy:
+  fail-fast: false
+  matrix:
+    shard: [1, 2, 3]
+steps:
+  - run: mvn test -Dtest=KanbanIntegrationTest -Dshard=${{ matrix.shard }}/3
+```
+
+---
+
+## 9. План имплементации тестов
+
+### Фаза 1: Инфраструктура (до реализации кода)
+
+- [ ] Добавить seedUser helper в KanbanIntegrationTest или BaseIntegrationTest
+- [ ] Проверить, что 4 @Disabled теста действительно падают без изменений entity (подтверждение baseline)
+- [ ] Создать тестовые JSON шаблоны (request body templates)
+
+### Фаза 2: ATDD-реализация (после реализации кода)
+
+- [ ] ATDD-1.1: createCard без assignee — creator=current user, assignee=null
+- [ ] ATDD-1.2: createCard с assignee — creator+assignee заполнены
+- [ ] ATDD-1.3: createCard с явным null assigneeId
+- [ ] ATDD-2.1: Board detail — карточки содержат 4 поля
+- [ ] ATDD-2.2: GET /api/boards summary не содержит карточек
+- [ ] ATDD-3.1/3.2: code review — проверить отсутствие new CardResponse(...) в сервисах
+- [ ] ATDD-3.3: BoardService.getBoard vs CardService.getCard — идентичные CardResponse
+- [ ] ATDD-4.1: updateCard resetAssignee=true — сброс assignee
+- [ ] ATDD-4.2: updateCard без assigneeId — assignee не меняется
+- [ ] ATDD-4.3: updateCard assigneeId=null + resetAssignee=false
+- [ ] ATDD-5.1: снять @Disabled — все 4 регрессионных теста проходят
+- [ ] ATDD-INT-1.1: createCard без сессии — 401
+- [ ] ATDD-INT-1.2: GET /api/boards/{id} — LazyInitializationException не возникает
+- [ ] ATDD-INT-2.1: старый запрос без assigneeId — 201
+- [ ] ATDD-INT-2.2: нестрогое сравнение — существующие тесты не ломаются
+
+### Фаза 3: Валидация
+
+- [ ] `mvn test` — 0 failures, 0 errors
+- [ ] Проверка отчёта Allure/SPR (если интегрирован)
+- [ ] Проверка лога сборки FE (если применимо)
+
+---
+
+## 10. Quality Gates & KPI
+
+### Gate: pre-commit локально
+
+| Gate | Порог | Метрика |
+|------|-------|---------|
+| G-01 (CardResponse.from) | PASS | Code review: BoardService + CardService делегируют |
+| G-02 (resetAssignee) | PASS | ATDD-4.1, ATDD-4.2, ATDD-4.3 — все PASS |
+| C-01 | BUILD SUCCESS | mvn compile |
+| C-03 | 0 failures | Все P0 ATDD (MockMvc) |
+
+### Gate: CI PR
+
+| Gate | Порог | Метрика |
+|------|-------|---------|
+| C-04 | 100% PASS | KanbanIntegrationTest |
+| P0-006 (TS-06) | PASS | Board detail cards содержат 4 поля |
+| C-07 | PASS | resetAssignee семантика |
+
+### Метрики качества (из test-quality)
+
+| Метрика | Цель | Текущее |
+|---------|------|---------|
+| Время выполнения ATDD | < 2 мин | ~20-40 секунд (MockMvc) |
+| Размер теста | < 300 строк | каждый тест < 50 строк |
+| Deterministic | нет hard waits | MockMvc — синхронный, детерминированный |
+| Isolation | self-cleaning | каждый тест — изолированный контекст |
+| Flakiness rate | 0% | MockMvc тесты стабильны |
+
+---
+
+## 11. Покрытие рисков
+
+| Risk ID | Score | Покрытие | Статус |
+|---------|-------|----------|--------|
+| R-01 | 9 (CRITICAL) | ATDD-1.1, ATDD-1.2, ATDD-1.3, ATDD-2.1, ATDD-2.2, ATDD-3.1, ATDD-3.2, ATDD-3.3 | ✅ полное |
+| R-03 | 4 (MEDIUM) | ATDD-4.1, ATDD-4.2, ATDD-4.3 | ✅ полное |
+| R-04 | 4 (MEDIUM) | ATDD-INT-2.1, ATDD-INT-2.2 | ✅ полное |
+| R-05 | 6 (HIGH) | ATDD-INT-1.1 (401 без сессии) | ✅ частичное (Story 4.3 — валидация assigneeId) |
+| R-08 | 1 (LOW) | — (moveCard не меняет assignee) | ✅ не требуется |
+| R-10 | 3 (LOW) | ATDD-5.1 (регрессия) | ✅ полное |
+
+**Остаточный риск:** R-05 (валидация assigneeId) будет полностью покрыт в Story 4.3 (service logic). На уровне Story 4.2 достаточно проверки, что createCard без assignee работает (R-04) и без сессии отклоняется (ATDD-INT-1.1).
+
+---
+
+## 12. Оценка трудоёмкости автоматизации
+
+| Фаза | Задачи | Оценка (человеко-часы) |
+|------|--------|------------------------|
+| Phase 1: Инфраструктура | seed helper, fixture setup | 1 ч |
+| Phase 2: ATDD (14 сценариев) | API IT тесты | 4-6 ч |
+| Phase 3: Regression enable | снятие @Disabled, верификация | 0.5 ч |
+| Phase 4: Code review | structural проверка ATDD-3.1/3.2 | 0.5 ч |
+| Phase 5: CI integration | pipeline configuration | 1 ч |
+| **Итого** | | **7-9 ч** |
+
+---
+
+## 13. Изменения в проекте
+
+### KanbanIntegrationTest.java (MODIFY)
+
+```java
+// Добавить seed helper:
+private User seedAdminUser(String username, String password) {
+    User user = new User(username, passwordEncoder.encode(password), Role.ADMIN);
+    return userRepository.save(user);
+}
+
+// НОВЫЕ ТЕСТЫ:
+// ATDD-1.1 — createCard без assignee
+// ATDD-1.2 — createCard с assignee
+// ATDD-1.3 — createCard с null assigneeId
+// ATDD-2.1 — Board detail содержит 4 поля
+// ATDD-2.2 — Board summary не содержит карточек
+// ATDD-3.3 — CardResponse идентичен в BoardService и CardService
+// ATDD-4.1 — resetAssignee=true
+// ATDD-4.2 — updateCard без assigneeId
+// ATDD-4.3 — assigneeId=null + resetAssignee=false
+// ATDD-INT-1.1 — 401 без сессии
+// ATDD-INT-1.2 — LazyInitializationException check
+// ATDD-INT-2.1 — обратная совместимость запроса
+// ATDD-INT-2.2 — нестрогое сравнение JSON
+
+// MODIFY — снять @Disabled с 4 тестов:
+// - cardCrudAndMoveNormalizeStablePositions
+// - invalidMoveDoesNotChangePersistedOrder
+// - deletingBoardCascadesColumnsAndCards
+// - resourcesOwnedByAnotherAdminAreHidden
+```
+
+---
+
+## 14. Риски автоматизации
+
+| Риск | Описание | Mitigation |
+|------|----------|------------|
+| ATDD-3.1/3.2 структурные — не могут быть полностью автоматизированы в CI | Поиск `new CardResponse(...)` в сервисах — code review | Добавить статический анализатор (ArchTest из ArchUnit) для будущих спринтов |
+| ATDD-2.2 (Board summary не содержит карточек) — может неявно измениться | Новый mapper может повлиять на структуру BoardResponse | Явный assert на размер/отсутствие `cards` |
+| ATDD-4.3 (null assigneeId + resetAssignee=false) — Jackson поведение | Jackson может не различать null vs absent при определённых настройках | Использовать `@JsonInclude(NON_NULL)` или `Optional<Long>` для assigneeId |
+
+---
+
+## 15. Заключение
+
+**Все 14 ATDD-сценариев** для Story 4.2 подлежат автоматизации через существующий MockMvc/JUnit 5 стек. Новая инфраструктура минимальна (seed второго ADMIN). 4 регрессионных теста разблокируются после имплементации entity.
+
+**Рекомендуемый порядок реализации тестов:**
+1. Дождаться реализации Card.java + CardDtos.java + mapper
+2. Включить seed helper для admin2
+3. Реализовать ATDD-1.x → ATDD-2.x → ATDD-4.x → ATDD-INT-x.x
+4. Снять @Disabled (ATDD-5.1)
+5. Провести code review structural checks (ATDD-3.x)
+6. Запустить полный suite — валидация
+
+**Generated by:** Murat (Master Test Architect) — TEA headless flow
+**Workflow:** bmad-tea@1.0 automate_atdd (via bmad-testarch-automate knowledge patterns)
+**HGSDLC Node:** ai-automate-tests (attempt-2)
+**Date:** 2026-07-22

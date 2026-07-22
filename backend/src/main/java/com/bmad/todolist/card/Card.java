@@ -2,6 +2,7 @@ package com.bmad.todolist.card;
 
 import com.bmad.todolist.board.Board;
 import com.bmad.todolist.board.ColumnStatus;
+import com.bmad.todolist.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -46,15 +47,25 @@ public class Card {
 	@Column(name = "updated_at", nullable = false)
 	private Instant updatedAt = Instant.now();
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "creator_id", nullable = false)
+	private User creator;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "assignee_id")
+	private User assignee;
+
 	protected Card() {
 	}
 
-	public Card(Board board, String title, String description, ColumnStatus status, int position) {
+	public Card(Board board, String title, String description, ColumnStatus status, int position, User creator) {
 		this.board = board;
 		this.title = title;
 		this.description = description;
 		this.status = status;
 		this.position = position;
+		this.creator = creator;
+		this.assignee = null;
 	}
 
 	public Long getId() {
@@ -87,6 +98,14 @@ public class Card {
 
 	public Instant getUpdatedAt() {
 		return updatedAt;
+	}
+
+	public User getCreator() {
+		return creator;
+	}
+
+	public User getAssignee() {
+		return assignee;
 	}
 
 	public void update(String title, String description) {

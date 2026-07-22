@@ -282,28 +282,31 @@ private CardResponse toResponse(Card card) {
 
 ### Implementation Tasks
 
-- [ ] Card.java — добавить поля creator (ManyToOne, NOT NULL) и assignee (ManyToOne, nullable)
-- [ ] CardDtos.java — расширить CardResponse + 4 поля; CreateCardRequest + assigneeId; UpdateCardRequest + assigneeId + resetAssignee
-- [ ] CardDtos.java — добавить CardResponse.from(Card) статический factory-метод
-- [ ] BoardService.java — заменить toCardResponse на делегирование CardResponse.from(Card)
-- [ ] CardService.java — заменить toResponse на делегирование CardResponse.from(Card)
-- [ ] KanbanIntegrationTest.java — снять @Disabled с 4 тестов
-- [ ] Запустить `mvn test` — проверить что все тесты проходят
+- [x] Card.java — добавить поля creator (ManyToOne, NOT NULL) и assignee (ManyToOne, nullable)
+- [x] CardDtos.java — расширить CardResponse + 4 поля; CreateCardRequest + assigneeId; UpdateCardRequest + assigneeId + resetAssignee
+- [x] CardDtos.java — добавить CardResponse.from(Card) статический factory-метод
+- [x] BoardService.java — заменить toCardResponse на делегирование CardResponse.from(Card)
+- [x] CardService.java — заменить toResponse на делегирование CardResponse.from(Card)
+- [x] KanbanIntegrationTest.java — снять @Disabled с 4 тестов
+- [x] Запустить `mvn test` — проверить что все тесты проходят
 
 ## File List
 
-- `backend/src/main/java/com/bmad/todolist/card/Card.java` — **MODIFY** — + поля creator/assignee
-- `backend/src/main/java/com/bmad/todolist/card/CardDtos.java` — **MODIFY** — +4 поля в CardResponse + assigneeId в request'ах + CardResponse.from()
+- `backend/src/main/java/com/bmad/todolist/card/Card.java` — **MODIFY** — + поля creator/assignee, обновлён конструктор, геттеры
+- `backend/src/main/java/com/bmad/todolist/card/CardDtos.java` — **MODIFY** — +4 поля в CardResponse + from() метод + assigneeId/resetAssignee в request'ах
 - `backend/src/main/java/com/bmad/todolist/board/BoardService.java` — **MODIFY** — toCardResponse → CardResponse.from()
-- `backend/src/main/java/com/bmad/todolist/card/CardService.java` — **MODIFY** — toResponse → CardResponse.from()
+- `backend/src/main/java/com/bmad/todolist/card/CardService.java` — **MODIFY** — toResponse → CardResponse.from(), + UserRepository
+- `backend/src/main/resources/application.yml` — **MODIFY** — + Jackson deserialization config
 - `backend/src/test/java/com/bmad/todolist/kanban/KanbanIntegrationTest.java` — **MODIFY** — снять @Disabled с 4 тестов
+- `backend/src/test/java/com/bmad/todolist/migration/V3MigrationIntegrationTest.java` — **MODIFY** — fix identity counter conflict (explicit id)
 
 ## Change Log
 
 | Date | Change | Author |
 |---|---|---|
 | 2026-07-22 | Story 4.2 создана: entity + DTO + единый mapper | Amelia |
+| 2026-07-22 | Реализованы entity поля creator/assignee, DTO расширение, единый CardResponse.from(), удалены дублирующие toResponse методы | Amelia |
 
 ## Status
 
-**ready-for-dev** — готова к реализации dev-агентом
+**review** — реализована, ожидает code review
