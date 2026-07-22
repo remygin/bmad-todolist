@@ -1,5 +1,5 @@
 generated: 2026-07-22
-last_updated: 2026-07-22T17:55
+last_updated: 2026-07-22T18:00
 project: bmad-todolist
 project_key: NOKEY
 tracking_system: file-system
@@ -31,7 +31,7 @@ development_status:
 
   epic-4: in-progress
   4-1-v3-миграция-добавление-creator-id-и-assignee-id-в-таблицу-cards: integration-ready
-  4-2-card-entity-dto-поля-creator-assignee-и-единый-mapper: backlog
+  4-2-card-entity-dto-поля-creator-assignee-и-единый-mapper: ready-for-dev
   4-3-cardservice-логика-creator-assignee-при-create-update-и-валидация-assignee-id: backlog
   4-4-get-api-users-эндпоинт-списка-admin-для-выбора-assignee: backlog
   4-5-frontend-отображение-creator-assignee-и-выбор-assignee-в-форме-карточки: backlog
