@@ -2,7 +2,7 @@
 id: "4.2"
 epic: 4
 story: 2
-key: "4-2-card-entity-dto-поля-creator-assignee-и-единый-mapper"
+key: "4-2-card-entity-dto-polya-creator-assignee-i-edinyj-mapper"
 title: "Card entity + DTO — поля creator/assignee и единый mapper"
 status: "ready-for-dev"
 baseline_commit: "19e5c2287906973db0532b1275e36fc95312697a"

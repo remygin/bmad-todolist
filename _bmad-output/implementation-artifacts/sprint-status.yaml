@@ -1,5 +1,5 @@
 generated: 2026-07-22
-last_updated: 2026-07-22T16:45
+last_updated: 2026-07-22T22:20
 project: bmad-todolist
 project_key: NOKEY
 tracking_system: file-system
@@ -7,32 +7,32 @@ story_location: "{project-root}/_bmad-output/implementation-artifacts"
 
 development_status:
   epic-1: done
-  1-1-bootstrap-роли-admin-и-учётной-записи: done
-  1-2-вход-по-логину-и-паролю: done
-  1-3-получение-профиля-текущего-администратора: done
-  1-4-выход-и-сброс-локальной-сессии: done
-  1-5-публичный-health-check: done
+  1-1-bootstrap-roli-admin-i-uchetnoj-zapisi: done
+  1-2-vhod-po-loginu-i-parolyu: done
+  1-3-poluchenie-profilya-tekuschego-administratora: done
+  1-4-vyhod-i-sbros-lokalnoj-sessii: done
+  1-5-publichnyj-health-check: done
   epic-1-retrospective: optional
 
   epic-2: done
-  2-1-список-и-просмотр-своих-досок: done
-  2-2-создание-доски-с-тремя-колонками: done
-  2-3-переименование-доски: done
-  2-4-удаление-доски: done
-  2-5-настройка-имён-и-порядка-колонок: done
+  2-1-spisok-i-prosmotr-svoih-dosok: done
+  2-2-sozdanie-doski-s-tremya-kolonkami: done
+  2-3-pereimenovanie-doski: done
+  2-4-udalenie-doski: done
+  2-5-nastrojka-imen-i-poryadka-kolonok: done
   epic-2-retrospective: optional
 
   epic-3: done
-  3-1-создание-карточки: done
-  3-2-редактирование-карточки: done
-  3-3-удаление-карточки: done
-  3-4-перемещение-карточки-drag-and-drop: done
+  3-1-sozdanie-kartochki: done
+  3-2-redaktirovanie-kartochki: done
+  3-3-udalenie-kartochki: done
+  3-4-peremeschenie-kartochki-drag-and-drop: done
   epic-3-retrospective: optional
 
   epic-4: in-progress
-  4-1-v3-миграция-добавление-creator-id-и-assignee-id-в-таблицу-cards: integration-ready
-  4-2-card-entity-dto-поля-creator-assignee-и-единый-mapper: integration-ready
-  4-3-cardservice-логика-creator-assignee-при-create-update-и-валидация-assignee-id: backlog
-  4-4-get-api-users-эндпоинт-списка-admin-для-выбора-assignee: backlog
-  4-5-frontend-отображение-creator-assignee-и-выбор-assignee-в-форме-карточки: backlog
+  4-1-v3-migraciya-dobavlenie-creator-id-i-assignee-id-v-tablicu-cards: integration-ready
+  4-2-card-entity-dto-polya-creator-assignee-i-edinyj-mapper: integration-ready
+  4-3-cardservice-logika-creator-assignee-pri-create-update-i-validaciya-assignee-id: backlog
+  4-4-get-api-users-endpoint-spiska-admin-dlya-vybora-assignee: backlog
+  4-5-frontend-otobrazhenie-creator-assignee-i-vybor-assignee-v-forme-kartochki: backlog
   epic-4-retrospective: optional
