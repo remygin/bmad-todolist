@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>PRD Validation: BMAD Todo List — Параметры пользователей на карточках</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --border: #e7e5e4;
+    --text: #1c1917;
+    --muted: #78716c;
+    --verdict-strong: #16a34a;
+    --verdict-adequate: #65a30d;
+    --verdict-thin: #d97706;
+    --verdict-broken: #dc2626;
+    --sev-low: #64748b;
+    --sev-medium: #ca8a04;
+    --sev-high: #ea580c;
+    --sev-critical: #dc2626;
+    --grade-exc: #16a34a;
+    --grade-good: #65a30d;
+    --grade-fair: #d97706;
+    --grade-poor: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 24px 64px; }
+  header.report-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .title h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .title .subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  .grade {
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: white;
+    font-size: 15px;
+    white-space: nowrap;
+  }
+  .grade-good { background: var(--grade-good); }
+  .synthesis {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--muted);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin-bottom: 24px;
+    font-size: 15.5px;
+  }
+  .synthesis p { margin: 0 0 10px; }
+  .synthesis p:last-child { margin-bottom: 0; }
+  .dimension-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .dim-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .dim-card .dim-name { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .dim-card .dim-verdict { font-size: 14px; font-weight: 600; }
+  section.dimension, section.reviewer-section { margin-bottom: 14px; }
+  section.dimension details, section.reviewer-section details {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  section summary {
+    padding: 14px 20px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  section summary::-webkit-details-marker { display: none; }
+  section summary::before {
+    content: "▸";
+    display: inline-block;
+    color: var(--muted);
+    transition: transform 0.15s ease;
+  }
+  section details[open] summary::before { transform: rotate(90deg); }
+  section summary h2 {
+    display: inline;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    flex: 1;
+  }
+  .verdict-pill {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: white;
+  }
+  .verdict-strong { background: var(--verdict-strong); }
+  .verdict-adequate { background: var(--verdict-adequate); }
+  .dim-body { padding: 4px 20px 18px; }
+  .dim-judgment { color: var(--text); font-size: 14.5px; }
+  .dim-judgment p { margin: 0 0 10px; }
+  .findings-list { padding: 0 20px 4px; }
+  article.finding {
+    padding: 14px 0;
+    border-top: 1px solid var(--border);
+  }
+  article.finding:first-child { border-top: none; }
+  article.finding header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .badge {
+    font-size: 10.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+  }
+  .badge-sev-low { background: rgba(100, 116, 139, 0.12); color: var(--sev-low); }
+  .badge-sev-medium { background: rgba(202, 138, 4, 0.14); color: var(--sev-medium); }
+  .finding-title { margin: 0; font-size: 15px; font-weight: 500; flex: 1; min-width: 200px; }
+  .finding-location { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; color: var(--muted); }
+  .finding-note, .finding-fix { margin-top: 6px; font-size: 14px; }
+  .finding-fix strong { color: var(--muted); font-weight: 500; }
+  .mechanical {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 24px;
+    font-size: 14px;
+  }
+  .mechanical h3 { margin: 0 0 10px; font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .mechanical ul { margin: 0; padding-left: 20px; }
+  .mechanical li { margin-bottom: 4px; color: var(--text); }
+  footer.report-footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  footer .meta { display: flex; gap: 24px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+  <div class="container">
+
+    <header class="report-header">
+      <div class="title">
+        <h1>BMAD Todo List — Параметры пользователей на карточках — Validation Report</h1>
+        <div class="subtitle">_bmad-output/planning-artifacts/prds/prd-bmad-todolist-2026-07-18/addendum.md</div>
+      </div>
+      <div class="grade grade-good">GOOD</div>
+    </header>
+
+    <div class="synthesis">
+      <p>Addendum написан дисциплинированно: дельта зафиксирована с явными границами, acceptance criteria testable, бизнес-правила формализованы. Все семь измерений качества — strong или adequate, без критических и высоких замечаний. Основные риски (3 medium, 3 low) связаны с неполнотой рекомендаций в открытых вопросах (OQ-4: неправильная рекомендация для null/absent assigneeId; OQ-2: отсутствие security-требований для GET /api/users) и отсутствием обязательного требования синхронизации сборки CardResponse (RR-1/OQ-1). Addendum готов к передаче в downstream-шаг архитектуры, но рекомендации OQ требуют верификации до начала реализации.</p>
+    </div>
+
+    <div class="dimension-summary">
+      <div class="dim-card">
+        <div class="dim-name">Decision-readiness</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Substance over theater</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Strategic coherence</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Done-ness clarity</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Scope honesty</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Downstream usability</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Shape fit</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+      </div>
+    </div>
+
+    <section class="dimension">
+      <details open>
+        <summary>
+          <h2>Decision-readiness</h2>
+          <span class="verdict-pill verdict-adequate">adequate</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Addendum корректно разграничивает принятые решения (BR-1–BR-8, дельта FR-11/FR-12, изменения Non-Goals) и открытые вопросы (OQ-1–OQ-6). Торговые компромиссы явно названы в OQ. Однако OQ-4 содержит рекомендацию (вариант D: @JsonInclude(NON_NULL)), которая технически не решает заявленную проблему — Jackson не различает отсутствующее поле и явный null для Long. Это снижает доверие к рекомендациям addendum.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">MEDIUM</span>
+              <h3 class="finding-title">OQ-4: неполнота рекомендации по разграничению null/absent</h3>
+              <span class="finding-location">§9 OQ-4 addendum</span>
+            </header>
+            <div class="finding-note">Рекомендация D (@JsonInclude(NON_NULL)) не решает проблему: Jackson десериализует отсутствующее поле как null для Long, не различая «не передано» и «явный null». Семантика «absent = не менять, null = сбросить» нереализуема.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Дополнить OQ-4 указанием, что Jackson-дефолты не подходят; рекомендовать Optional&lt;Long&gt; или кастомный десериализатор.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">MEDIUM</span>
+              <h3 class="finding-title">RR-1/OQ-1: риск рассинхронизации сборки CardResponse</h3>
+              <span class="finding-location">§4, §8, §11 addendum</span>
+            </header>
+            <div class="finding-note">Addendum фиксирует риск RR-1 (дублирование toCardResponse в BoardService и CardService, высокая вероятность), но OQ-1 лишь рекомендует общий mapper, не закрепляя обязательное требование. Риск остаётся не-митигированным на уровне требований.</div>
+            <div class="finding-fix"><strong>Fix:</strong> В FR-12 или affected areas добавить: «CardResponse собирается единым методом; BoardService делегирует CardService, а не дублирует конструктор.»</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Substance over theater</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Addendum лишён «театральных» секций. Каждый раздел содержательный и обоснованный. Никаких шаблонных фраз, инновационной риторики или раздутых персон.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details open>
+        <summary>
+          <h2>Strategic coherence</h2>
+          <span class="verdict-pill verdict-adequate">adequate</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Тезис addendum ясен — расширить модель карточки полями creator/assignee. FR, BR и ограничения следуют из этого тезиса. Связь с существующей архитектурой прослеживается в assumptions §10. Однако cross-board assignee (EC-4) обсуждается в PIA §5 как требующий политики, но в addendum политика раскрыта минимально (BR-5).</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">LOW</span>
+              <h3 class="finding-title">EC-4/PIA: политика cross-board assignee не полностью раскрыта</h3>
+              <span class="finding-location">§5 EC-4 addendum</span>
+            </header>
+            <div class="finding-note">EC-4 допускает cross-board assignee. BR-5 утверждает отсутствие прав доступа. Не документировано, валидируется ли принадлежность assignee к доске.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Явно указать: «assignee может быть любым ADMIN в системе, независимо от владения доской. Права доступа определяются только Board.author.»</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Done-ness clarity</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Каждый AC testable с Given/When/Then. Edge cases покрывают corner cases. BR однозначны. Consequences FR-11/FR-12 содержат проверяемые условия. Нет размытых формулировок.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">LOW</span>
+              <h3 class="finding-title">AC-8: формат отображения на фронтенде не специфицирован</h3>
+              <span class="finding-location">§4 AC-8 addendum</span>
+            </header>
+            <div class="finding-note">Указан факт отображения username, но не расположение на карточке. Допустимо для UX-шага, но создаёт риск разногласий.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Указать минимальные требования к расположению (например, «мелким шрифтом под заголовком карточки»).</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Scope honesty</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Out of scope (§7) явный и подробный (11 пунктов). Assumptions (§10) — 8 предположений, все обоснованы. Regression risks (§11) с указанием вероятности и митигации. Non-Goals базового PRD скорректированы в §2.3 — честная фиксация изменения scope.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">LOW</span>
+              <h3 class="finding-title">Non-Goals: механизм применения дельты не определён</h3>
+              <span class="finding-location">§2.3 addendum</span>
+            </header>
+            <div class="finding-note">Addendum изменяет Non-Goals §5 базового PRD, но не уточняет механизм (редактирование base PRD status: final vs addendum как source of truth).</div>
+            <div class="finding-fix"><strong>Fix:</strong> Зафиксировать: «При утверждении scope base PRD получает новую редакцию с изменениями из §2.3, status: updated.»</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details open>
+        <summary>
+          <h2>Downstream usability</h2>
+          <span class="verdict-pill verdict-adequate">adequate</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Глоссарий расширен (§1) терминами Creator и Assignee — закреплены в FR и AC. FR ID (FR-11, FR-12) сохранены. BR, AC, EC, OQ имеют уникальные ID. Cross-ссылки на базовый PRD корректны. Однако OQ-2 не специфицирует требования безопасности для нового эндпоинта, что может затруднить downstream-шаг.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">MEDIUM</span>
+              <h3 class="finding-title">OQ-2: отсутствие security-требований для GET /api/users</h3>
+              <span class="finding-location">§8, §9 OQ-2 addendum</span>
+            </header>
+            <div class="finding-note">Не указано, требуется ли аутентификация ADMIN для нового эндпоинта GET /api/users, и какие поля возвращать.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Добавить: «GET /api/users требует аутентификации ADMIN; неаутентифицированные запросы — 401/403. Возвращает id + username.»</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Shape fit</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Формат «on_addendum» адекватен для данного изменения: feature затрагивает множественные слои, требует миграции данных и несёт regression risk. Addendum правильно позиционирован как дельта. Архитектурные решения оставлены downstream-шагу — корректное разграничение ответственности.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+        </div>
+      </details>
+    </section>
+
+    <div class="mechanical">
+      <h3>Mechanical notes</h3>
+      <ul>
+        <li>Глоссарий: термины Creator и Assignee добавлены в §1 addendum, согласованы с FR/AC. Нет расхождений.</li>
+        <li>ID continuity: FR-11, FR-12 сохранены из базового PRD. BR, AC, EC, OQ — сплошная нумерация в пределах addendum.</li>
+        <li>Cross-ссылки: addendum → PRD (§5, FR-11, FR-12, UJ-2) — все корректны.</li>
+        <li>UJ: UJ-2 базового PRD расширяется; новых UJ нет — корректно для дельты.</li>
+        <li>Assumptions Index (§10): 8 assumptions, все обоснованы существующей архитектурой.</li>
+        <li>Цитирования путей указаны как шаблоны — допустимо для PRD.</li>
+      </ul>
+    </div>
+
+    <footer class="report-footer">
+      <div class="meta">
+        <span>Rubric: .opencode/skills/bmad-prd@1.0/assets/prd-validation-checklist.md</span>
+        <span>Generated: 2026-07-22T12:00:00Z</span>
+      </div>
+      <div class="meta">
+        <span>Reviewer: review-rubric.md</span>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
