@@ -1,0 +1,9 @@
+target/
+.idea/
+*.iml
+build/
+out/
+selenide-reports/
+test-results/
+screenshots/
+downloads/
