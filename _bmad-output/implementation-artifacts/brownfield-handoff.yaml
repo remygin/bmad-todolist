@@ -1,0 +1,14 @@
+feature: bmad-todolist-assignee-creator
+scope: >-
+  Реализация назначения исполнителя (assignee) и создателя (creator) на
+  карточки: миграция БД (Flyway V3), backend-логика CardService/BoardService,
+  управление пользователями (POST/GET /api/users), frontend-компоненты
+  (Avatar, CardForm, BoardPage role-based UI) и интеграционные тесты.
+prd: _bmad-output/planning-artifacts/prds/prd-bmad-todolist-2026-07-18/prd.md
+prd_addendum: _bmad-output/planning-artifacts/prds/prd-bmad-todolist-2026-07-18/addendum.md
+architecture_delta: _bmad-output/planning-artifacts/architecture/architecture-bmad-todolist-2026-07-23/architecture-delta.md
+architecture_spine: _bmad-output/planning-artifacts/architecture/architecture-bmad-todolist-2026-07-18/ARCHITECTURE-SPINE.md
+epics: _bmad-output/planning-artifacts/epics.md
+test_design_architecture: _bmad-output/test-artifacts/test-design-architecture.md
+test_design_qa: _bmad-output/test-artifacts/test-design-qa.md
+sprint_status: _bmad-output/implementation-artifacts/sprint-status.yaml

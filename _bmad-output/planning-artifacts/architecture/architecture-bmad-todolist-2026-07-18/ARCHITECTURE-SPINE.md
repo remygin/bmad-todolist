@@ -7,7 +7,7 @@ paradigm: 'layered REST API + component SPA'
 scope: 'Full-system brownfield: auth, boards, columns, cards, FE SPA, deploy envelope'
 status: final
 created: '2026-07-18'
-updated: '2026-07-18'
+updated: '2026-07-23'
 binds: ['FR-1','FR-2','FR-3','FR-4','FR-5','FR-6','FR-7','FR-8','FR-9','FR-10','FR-11','FR-12','FR-13','FR-14','FR-15']
 sources:
   - '_bmad-output/planning-artifacts/prds/prd-bmad-todolist-2026-07-18/prd.md'
@@ -70,7 +70,7 @@ flowchart LR
 
 - **Binds:** FR-1–FR-4, FR-5–FR-14 access, security NFR
 - **Prevents:** localStorage/cookie/URL tokens; `hasAuthority('ADMIN')` vs `hasRole('ADMIN')` drift; session cookies; CSRF filter reintroduction without a task; unprotected Kanban routes
-- **Rule:** Stateless JWT in `Authorization: Bearer`. Security filter chain: CSRF disabled, `SessionCreationPolicy.STATELESS`, CORS as in AD-10. Client stores token only in `sessionStorage` key `todolist.accessToken`. On SPA bootstrap, invalid/expired token is cleared and the user is sent to login. Public: `POST /api/auth/login`, `GET /actuator/health`. Remaining `/api/**` authenticated. All Kanban endpoints use `@PreAuthorize("hasRole('ADMIN')")`. Logout is client-only (clear `sessionStorage`); no server revoke. Default TTL 1h via `JWT_EXPIRATION_MS`. Do not change CSRF/session policy without an explicit task.
+- **Rule:** Stateless JWT in `Authorization: Bearer`. Security filter chain: CSRF disabled, `SessionCreationPolicy.STATELESS`, CORS as in AD-10. Client stores token only in `sessionStorage` key `todolist.accessToken`. On SPA bootstrap, invalid/expired token is cleared and the user is sent to login. Public: `POST /api/auth/login`, `GET /actuator/health`. Remaining `/api/**` authenticated. Kanban mutations (POST/PUT/DELETE) use `@PreAuthorize("hasRole('ADMIN')")`. Kanban read endpoints GET /api/boards and GET /api/boards/{id} use access logic: ADMIN OR assignee (via EXISTS cards.assignee_id), without @PreAuthorize. GET /api/users is `@PreAuthorize("hasRole('ADMIN')")`. Logout is client-only (clear `sessionStorage`); no server revoke. Default TTL 1h via `JWT_EXPIRATION_MS`. Do not change CSRF/session policy without an explicit task.
 
 ### AD-4 — Three-column status invariant `[ADOPTED]`
 
@@ -82,7 +82,7 @@ flowchart LR
 
 - **Binds:** FR-5–FR-14; SM-3
 - **Prevents:** cross-author data exposure; concurrent position corruption
-- **Rule:** Boards belong to `author_id`. Reads/mutations use author-scoped queries (`findByIdAndAuthorId` / `findOwned*`). Mutations that reorder take `findOwned*ForUpdate` (pessimistic) on the Board. Foreign or missing board/card IDs return **404**, not 403.
+- **Rule:** Boards belong to `author_id`; read access extended to assignee via `author_id OR EXISTS(SELECT 1 FROM cards WHERE board_id = ? AND assignee_id = ?)`. Mutations remain author-scoped queries (`findOwned*ForUpdate`, pessimistic). Foreign or missing board/card IDs return **404**, not 403.
 
 ### AD-6 — Card position and status mutation authority `[ADOPTED]`
 
@@ -131,7 +131,25 @@ flowchart LR
 
 - **Binds:** FR-5, FR-9–FR-14 UI load
 - **Prevents:** nested vs flat board payloads shipping side by side
-- **Rule:** Canonical board detail is nested: `BoardResponse.columns[]` each with `cards[]` (`ColumnResponse`). List endpoint returns summaries without cards. Do not add a parallel “flat cards list for the same screen” as the default board load without replacing this AD. FE `Board` type mirrors that tree in `api/kanban.ts`.
+- **Rule:** Canonical board detail is nested: `BoardResponse.columns[]` each with `cards[]` (`ColumnResponse`). List endpoint returns summaries without cards. Do not add a parallel "flat cards list for the same screen" as the default board load without replacing this AD. FE `Board` type mirrors that tree in `api/kanban.ts`.
+
+### AD-13 — User listing endpoint `[ADOPTED]`
+
+- **Binds:** assignee UI selection feature
+- **Prevents:** non-admin user enumeration; password/email/role exposure in list
+- **Rule:** `GET /api/users` is `@PreAuthorize("hasRole('ADMIN')")` only, returns `[{id, username}]`. No pagination for MVP; `?q=` query param reserved for future search. Response excludes password, email, roles.
+
+### AD-14 — Card creator and assignee `[ADOPTED]`
+
+- **Binds:** all Card entity usage
+- **Prevents:** nullable creator; eager fetch of User relations on every read; dual write paths for assignee
+- **Rule:** `Card.creator` (`@ManyToOne`, NOT NULL) and `Card.assignee` (`@ManyToOne`, nullable) — both FetchType.LAZY with `@NamedEntityGraph("Card.withCreatorAndAssignee")`. Loading within `@Transactional` service methods (open-in-view: false). Only `CardService` writes `assignee_id`. `creator_id` is set automatically from `@AuthenticationPrincipal`, not user-supplied.
+
+### AD-15 — User deletion policy `[ADOPTED]`
+
+- **Binds:** user lifecycle
+- **Prevents:** orphan cards without creator; FK violation on user delete
+- **Rule:** Deleting a User with existing `Card.creator_id` references is prohibited. Deleting a User with existing `Card.assignee_id` references sets `assignee_id = NULL`. No cascade delete of cards on user removal.
 
 ## Consistency Conventions
 
@@ -198,6 +216,8 @@ erDiagram
   CARD {
     string status
     int position
+    bigint creator_id FK "NOT NULL"
+    bigint assignee_id FK "nullable"
   }
 ```
 
@@ -208,8 +228,10 @@ erDiagram
 | Auth login / me / logout / bootstrap (FR-1–4) | `auth/`, `config/AdminBootstrap`, `frontend/src/auth` | AD-3, AD-1 |
 | Boards list/create/rename/delete (FR-5–8) | `board/`, `pages/BoardsPage` | AD-4, AD-5, AD-7, AD-8, AD-11, AD-12 |
 | Columns invariant + configure (FR-9–10) | `BoardService`, `ColumnSettings` | AD-4, AD-5, AD-11 |
-| Cards CRUD + move (FR-11–14) | `card/`, `components/kanban` | AD-5, AD-6, AD-8, AD-9, AD-11, AD-12 |
+| Cards CRUD + move (FR-11–14) | `card/`, `components/kanban` | AD-5, AD-6, AD-8, AD-9, AD-11, AD-12, AD-14 |
 | Health (FR-15) | Actuator + nginx/Vite proxy | AD-10 |
+| User listing (assignee selection) | `user/`, `api/user.ts` | AD-3, AD-13 |
+| Board access for assignee | `board/`, `card/` | AD-5 (amend) |
 | Error UX / ApiError | `common/`, `api/client.ts` | AD-8, AD-9 |
 
 ## Deferred
