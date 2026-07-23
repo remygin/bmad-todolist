@@ -13,6 +13,24 @@ Kanban-приложение на Spring Boot + React с JWT-аутентифик
 
 > На локальной машине проекта используется Java 17 (Spring Boot 4 её поддерживает). Docker Compose описан в репозитории; для полного стека нужен установленный Docker.
 
+## Структура репозитория
+
+`backend`, `frontend` и `autotests` — git-сабмодули, каждый в своём репозитории:
+
+| Каталог | Репозиторий |
+| --- | --- |
+| `backend` | `github.com/remygin/bmad-todolist-backend` |
+| `frontend` | `github.com/remygin/bmad-todolist-frontend` |
+| `autotests` | `github.com/remygin/bmad-todolist-autotests` |
+
+Клонирование вместе с сабмодулями:
+
+```bash
+git clone --recurse-submodules git@github.com:remygin/bmad-todolist.git
+# в уже склонированном репозитории:
+git submodule update --init
+```
+
 ## Быстрый старт (локально)
 
 ### 1. Переменные окружения
@@ -120,8 +138,9 @@ Kanban endpoint доступны только пользователю с рол
 ## Структура
 
 ```
-backend/     Spring Boot API
-frontend/    React UI
+backend/     Spring Boot API      (сабмодуль)
+frontend/    React UI             (сабмодуль)
+autotests/   E2E-автотесты        (сабмодуль)
 docker-compose.yml
 .env.example
 ```
