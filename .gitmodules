@@ -1,0 +1,12 @@
+[submodule "backend"]
+	path = backend
+	url = git@github.com:remygin/bmad-todolist-backend.git
+	branch = main
+[submodule "frontend"]
+	path = frontend
+	url = git@github.com:remygin/bmad-todolist-frontend.git
+	branch = main
+[submodule "autotests"]
+	path = autotests
+	url = git@github.com:remygin/bmad-todolist-autotests.git
+	branch = main
