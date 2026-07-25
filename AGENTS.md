@@ -8,16 +8,13 @@
 | Каталог | Что пишется | Что НЕ пишется |
 |---------|-------------|----------------|
 | `backend/` | Код API (Spring Boot): controllers, services, JPA, Flyway, security | E2E / браузерные / Rest Assured против живого стенда |
-| `backend/src/test/` | Unit и интеграционные тесты кода: JUnit 5 + MockMvc + H2 (`@ActiveProfiles("test")`) | Selenide, Playwright, тесты против поднятого UI/API |
 | `frontend/` | Код UI (React/TS/Vite): pages, components, `src/api/*` | Автотесты раннера (Jest/Vitest/Playwright) без отдельной задачи |
-| `frontend/` (проверка) | Gate качества: `npm run lint` + `npm run build` | Unit/E2E в этом каталоге по умолчанию |
 | `autotests/` | E2E / системные автотесты против поднятого стенда: API (Rest Assured) и UI (Selenide) | Прод-код приложения; MockMvc / in-process Spring-тесты |
 
 Кратко:
 
-- **Код приложения** → `backend/` + `frontend/`
-- **Тесты кода (unit/IT)** → только `backend/src/test/`
-- **Автотесты E2E (API + UI)** → только `autotests/`
+- **Разработка** ведётся в `backend/` и `frontend/` — там работает разработчик
+- **QA** работает в `autotests/` — там пишет E2E / системные автотесты (API + UI)
 - Детали стека и инвариантов — в `_bmad-output/project-context.md` и `docs/`
 
 # Сабмодули
