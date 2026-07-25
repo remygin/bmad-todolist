@@ -8,18 +8,32 @@
 | Каталог | Что пишется | Что НЕ пишется |
 |---------|-------------|----------------|
 | `backend/` | Код API (Spring Boot): controllers, services, JPA, Flyway, security | E2E / браузерные / Rest Assured против живого стенда |
-| `backend/src/test/` | Unit и интеграционные тесты кода: JUnit 5 + MockMvc + H2 (`@ActiveProfiles("test")`) | Selenide, Playwright, тесты против поднятого UI/API |
 | `frontend/` | Код UI (React/TS/Vite): pages, components, `src/api/*` | Автотесты раннера (Jest/Vitest/Playwright) без отдельной задачи |
-| `frontend/` (проверка) | Gate качества: `npm run lint` + `npm run build` | Unit/E2E в этом каталоге по умолчанию |
 | `autotests/` | E2E / системные автотесты против поднятого стенда: API (Rest Assured) и UI (Selenide) | Прод-код приложения; MockMvc / in-process Spring-тесты |
 
 Кратко:
 
-- **Код приложения** → `backend/` + `frontend/`
-- **Тесты кода (unit/IT)** → только `backend/src/test/`
-- **Автотесты E2E (API + UI)** → только `autotests/`
+- **Разработка** ведётся в `backend/` и `frontend/` — там работает разработчик
+- **QA** работает в `autotests/` — там пишет E2E / системные автотесты (API + UI)
 - Детали стека и инвариантов — в `_bmad-output/project-context.md` и `docs/`
 
 # Сабмодули
 
 `backend/`, `frontend/`, `autotests/` — отдельные git-репозитории, подключённые сабмодулями. Изменения внутри каталога коммитятся и пушатся в его собственный репозиторий; в монорепо затем коммитится обновлённый указатель сабмодуля (`git add <каталог>`).
+
+# Коммиты
+
+Сообщения коммитов — по [Conventional Commits 1.0.0](https://www.conventionalcommits.org/ru/v1.0.0/):
+
+```
+<тип>[необязательный контекст]: <описание>
+
+[необязательное тело]
+
+[необязательная(ые) сноска(и)]
+```
+
+- Формат: `тип` (существительное), опционально `(контекст)`, затем `: ` и краткое описание.
+- Основные типы: `feat` — новая функция; `fix` — исправление бага. Допустимы также `docs`, `refactor`, `test`, `chore`, `ci`, `build`, `style`, `perf` и др.
+- Ломающие изменения: `BREAKING CHANGE:` в сноске и/или `!` после типа/контекста (например `feat(api)!: ...`).
+- Примеры: `feat(auth): add login endpoint`, `fix(ui): correct empty list state`, `docs: clarify repo ownership`.

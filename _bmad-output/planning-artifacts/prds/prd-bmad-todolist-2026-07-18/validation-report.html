@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>PRD Validation: BMAD Todo List + Addendum</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --border: #e7e5e4;
+    --text: #1c1917;
+    --muted: #78716c;
+    --verdict-strong: #16a34a;
+    --verdict-adequate: #65a30d;
+    --verdict-thin: #d97706;
+    --verdict-broken: #dc2626;
+    --sev-low: #64748b;
+    --sev-medium: #ca8a04;
+    --sev-high: #ea580c;
+    --sev-critical: #dc2626;
+    --grade-exc: #16a34a;
+    --grade-good: #65a30d;
+    --grade-fair: #d97706;
+    --grade-poor: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 24px 64px; }
+  header.report-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 24px;
+  }
+  .title h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .title .subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  .grade { padding: 10px 18px; border-radius: 8px; font-weight: 600; color: white; font-size: 15px; white-space: nowrap; }
+  .grade-fair { background: var(--grade-fair); }
+  .synthesis {
+    background: var(--surface); border: 1px solid var(--border);
+    border-left: 3px solid var(--muted); border-radius: 8px;
+    padding: 18px 22px; margin-bottom: 24px; font-size: 15.5px;
+  }
+  .synthesis p { margin: 0 0 10px; }
+  .synthesis p:last-child { margin-bottom: 0; }
+  .dimension-summary {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px; margin-bottom: 24px;
+  }
+  .dim-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+  .dim-card .dim-name { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .dim-card .dim-verdict { font-size: 14px; font-weight: 600; }
+  section.dimension, section.reviewer-section { margin-bottom: 14px; }
+  section.dimension details, section.reviewer-section details {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+  }
+  section summary {
+    padding: 14px 20px; cursor: pointer; user-select: none;
+    list-style: none; display: flex; align-items: center; gap: 12px;
+  }
+  section summary::-webkit-details-marker { display: none; }
+  section summary::before { content: "▸"; display: inline-block; color: var(--muted); transition: transform 0.15s ease; }
+  section details[open] summary::before { transform: rotate(90deg); }
+  section summary h2 { display: inline; margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.005em; flex: 1; }
+  .verdict-pill { font-size: 11px; padding: 3px 10px; border-radius: 999px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: white; }
+  .verdict-strong { background: var(--verdict-strong); }
+  .verdict-adequate { background: var(--verdict-adequate); }
+  .verdict-thin { background: var(--verdict-thin); }
+  .verdict-broken { background: var(--verdict-broken); }
+  .dim-body { padding: 4px 20px 18px; }
+  .dim-judgment { color: var(--text); font-size: 14.5px; }
+  .dim-judgment p { margin: 0 0 10px; }
+  .findings-list { padding: 0 20px 4px; }
+  article.finding { padding: 14px 0; border-top: 1px solid var(--border); }
+  article.finding:first-child { border-top: none; }
+  article.finding header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+  .badge { font-size: 10.5px; padding: 3px 8px; border-radius: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; line-height: 1.4; }
+  .badge-sev-high { background: rgba(234, 88, 12, 0.14); color: var(--sev-high); }
+  .badge-sev-medium { background: rgba(202, 138, 4, 0.14); color: var(--sev-medium); }
+  .badge-sev-low { background: rgba(100, 116, 139, 0.12); color: var(--sev-low); }
+  .finding-title { margin: 0; font-size: 15px; font-weight: 500; flex: 1; min-width: 200px; }
+  .finding-location { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; color: var(--muted); }
+  .finding-note, .finding-fix { margin-top: 6px; font-size: 14px; }
+  .finding-fix strong { color: var(--muted); font-weight: 500; }
+  .mechanical { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin-top: 24px; font-size: 14px; }
+  .mechanical h3 { margin: 0 0 10px; font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .mechanical ul { margin: 0; padding-left: 20px; }
+  .mechanical li { margin-bottom: 4px; }
+  footer.report-footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  footer .meta { display: flex; gap: 24px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header class="report-header">
+  <div class="title">
+    <h1>BMAD Todo List + Addendum — Validation Report</h1>
+    <div class="subtitle">_bmad-output/planning-artifacts/prds/prd-bmad-todolist-2026-07-18/prd.md</div>
+  </div>
+  <div class="grade grade-fair">FAIR</div>
+</header>
+
+<div class="synthesis">
+  <p>Addendum компетентно фиксирует изменения, открытые вопросы и зоны влияния, но страдает от несбалансированной полноты: 10 Open Questions, 3 из которых затрагивают базовые бизнес-правила (BP-4, BP-5, BP-11), и полное отсутствие Success Metrics для новой функциональности. Precondition OQ-5 (создание пользователей) корректно вынесен в Out of Scope, но его блокирующий характер для всего downstream недостаточно акцентирован. Документ пригоден для архитектурного обсуждения, но требует разрешения ключевых OQ и добавления SMs перед переходом к реализации.</p>
+</div>
+
+<div class="dimension-summary">
+  <div class="dim-card">
+    <div class="dim-name">Decision-readiness</div>
+    <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+  </div>
+  <div class="dim-card">
+    <div class="dim-name">Substance over theater</div>
+    <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+  </div>
+  <div class="dim-card">
+    <div class="dim-name">Strategic coherence</div>
+    <div class="dim-verdict" style="color: var(--verdict-thin)">thin</div>
+  </div>
+  <div class="dim-card">
+    <div class="dim-name">Done-ness clarity</div>
+    <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+  </div>
+  <div class="dim-card">
+    <div class="dim-name">Scope honesty</div>
+    <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+  </div>
+  <div class="dim-card">
+    <div class="dim-name">Downstream usability</div>
+    <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+  </div>
+  <div class="dim-card">
+    <div class="dim-name">Shape fit</div>
+    <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+  </div>
+</div>
+
+<section class="dimension">
+  <details>
+    <summary>
+      <h2>Decision-readiness</h2>
+      <span class="verdict-pill verdict-adequate">adequate</span>
+    </summary>
+    <div class="dim-body">
+      <div class="dim-judgment">
+        <p>Addendum честно маркирует открытые вопросы (OQ-1–OQ-10) и явно указывает, какие Non-Goals родительского PRD отменяет. Решение о формате (Addendum vs inline) задокументировано в prd-format-decision. Три бизнес-правила (BP-4, BP-5, BP-11) имеют статус «Открытый вопрос» — addendum не скрывает неопределённость. Однако количество открытых вопросов (10) для addendum, который должен фиксировать решение PO, высоко. 3 из них затрагивают фундаментальные аспекты (что видит assignee, когда теряет доступ). Decision-maker может действовать, но с оговоркой: до закрытия OQ-1, OQ-2, OQ-3 downstream-работа будет оперировать предположениями.</p>
+      </div>
+    </div>
+    <div class="findings-list">
+      <article class="finding">
+        <header>
+          <span class="badge badge-sev-high">HIGH</span>
+          <h3 class="finding-title">3 базовых бизнес-правила отмечены как открытые вопросы</h3>
+          <span class="finding-location">§3 BP-4, BP-5, BP-11</span>
+        </header>
+        <div class="finding-note">BP-4 (доступ ко всей Доске), BP-5 (снятие доступа), BP-11 (видимость всех карточек) имеют источник «Открытый вопрос». Три из одиннадцати бизнес-правил не фиксированы.</div>
+        <div class="finding-fix"><strong>Fix:</strong> Закрыть OQ-1, OQ-2, OQ-3 до или параллельно архитектурной проработке. Зафиксировать BP после решения PO.</div>
+      </article>
+    </div>
+  </details>
+</section>
+
+<section class="dimension">
+  <details>
+    <summary>
+      <h2>Substance over theater</h2>
+      <span class="verdict-pill verdict-adequate">adequate</span>
+    </summary>
+    <div class="dim-body">
+      <div class="dim-judgment">
+        <p>Addendum содержателен: разделы BP, AC, EC, Constraints, Affected Areas наполнены конкретикой. Нет persona-театра, innovation-театра или пустых NFR. Раздел Risks (§10) частично дублирует PIA (R-2, R-3, R-5, R-6 уже описаны в Product Impact Assessment) — это не ошибка, но снижает плотность новой информации в addendum.</p>
+      </div>
+    </div>
+  </details>
+</section>
+
+<section class="dimension">
+  <details open>
+    <summary>
+      <h2>Strategic coherence</h2>
+      <span class="verdict-pill verdict-thin">thin</span>
+    </summary>
+    <div class="dim-body">
+      <div class="dim-judgment">
+        <p>Addendum имеет тезис («базовая коллаборация на Доске»), но не развивает стратегическую дугу: почему assignee+creator — правильный первый шаг к multi-user, а не, например, комментарии или уведомления? Приоритизация отсутствует. Ключевая проблема: полное отсутствие Success Metrics для новой функциональности. Родительский PRD имеет три SM и один counter-metric; addendum не определяет ни одного. Без SMs нельзя верифицировать успех фичи.</p>
+      </div>
+    </div>
+    <div class="findings-list">
+      <article class="finding">
+        <header>
+          <span class="badge badge-sev-high">HIGH</span>
+          <h3 class="finding-title">Нет Success Metrics для новой функциональности</h3>
+          <span class="finding-location">Addendum (отсутствующий раздел)</span>
+        </header>
+        <div class="finding-note">Родительский PRD содержит SM-1, SM-2, SM-3, SM-C1. Addendum не определяет ни одной метрики успеха для multi-user коллаборации.</div>
+        <div class="finding-fix"><strong>Fix:</strong> Добавить раздел Success Metrics в addendum (минимум 1 primary metric + 1 counter-metric).</div>
+      </article>
+    </div>
+  </details>
+</section>
+
+<section class="dimension">
+  <details>
+    <summary>
+      <h2>Done-ness clarity</h2>
+      <span class="verdict-pill verdict-adequate">adequate</span>
+    </summary>
+    <div class="dim-body">
+      <div class="dim-judgment">
+        <p>20 Acceptance Criteria (AC-1.x–AC-6.x) — хороший охват backend и frontend. 8 Edge Cases (EC-1–EC-8) дополняют AC. Проблема: часть AC зависит от неразрешённых OQ (AC-6.2 «видит Доску целиком» зависит от OQ-1). Если OQ-1 решится в пользу «только свои карточки», AC-6.2 изменится. Это создаёт неопределённость для downstream.</p>
+      </div>
+    </div>
+  </details>
+</section>
+
+<section class="dimension">
+  <details>
+    <summary>
+      <h2>Scope honesty</h2>
+      <span class="verdict-pill verdict-adequate">adequate</span>
+    </summary>
+    <div class="dim-body">
+      <div class="dim-judgment">
+        <p>Out of Scope (§7) явно перечисляет исключения. OQ-5 (создание пользователей) корректно вынесен как precondition. Constraints (C-1–C-8) фиксируют технические границы. Отсутствие Assumptions Index — пробел: addendum делает неявные допущения (assignee использует ту же JWT-аутентификацию, тот же login, sessionStorage), которые не документированы.</p>
+      </div>
+    </div>
+  </details>
+</section>
+
+<section class="dimension">
+  <details>
+    <summary>
+      <h2>Downstream usability</h2>
+      <span class="verdict-pill verdict-adequate">adequate</span>
+    </summary>
+    <div class="dim-body">
+      <div class="dim-judgment">
+        <p>Affected Areas (§8) — сильный раздел для архитектуры и story creation. ACs пригодны для тестирования. Проблема: UJ-N1, UJ-N2, UJ-N3 из PIA не формализованы в addendum как полноценные User Journeys (с named protagonist, шагами, кульминацией). Родительский PRD имеет три UJ; их эквиваленты в addendum отсутствуют, что снижает пригодность для UX-проработки. Термин «Исполнитель» используется в двух значениях (концепт на карточке и роль не-ADMIN) без явного разделения.</p>
+      </div>
+    </div>
+    <div class="findings-list">
+      <article class="finding">
+        <header>
+          <span class="badge badge-sev-high">HIGH</span>
+          <h3 class="finding-title">Новые пользовательские сценарии (UJ-N1..N3) не формализованы в addendum</h3>
+          <span class="finding-location">Addendum (отсутствующий раздел)</span>
+        </header>
+        <div class="finding-note">PIA определяет три новых сценария, но addendum не включает их как структурированные UJ.</div>
+        <div class="finding-fix"><strong>Fix:</strong> Добавить раздел UJ (User Journeys) в addendum, повторяя стиль родительского PRD.</div>
+      </article>
+    </div>
+  </details>
+</section>
+
+<section class="dimension">
+  <details>
+    <summary>
+      <h2>Shape fit</h2>
+      <span class="verdict-pill verdict-adequate">adequate</span>
+    </summary>
+    <div class="dim-body">
+      <div class="dim-judgment">
+        <p>Формат Addendum адекватен: фича отменяет Non-Goal родительского PRD, что делает inline-редакцию неуместной. Addendum правильно расширяет, а не замещает родительский PRD. Brownfield-природа учтена (parent frontmatter, ссылки на §5, FR-5).</p>
+      </div>
+    </div>
+  </details>
+</section>
+
+<div class="mechanical">
+  <h3>Mechanical notes</h3>
+  <ul>
+    <li>ID continuity: AC-1.x–AC-6.x — без пропусков и дубликатов. EC-1–EC-8 — полные.</li>
+    <li>Cross-refs: Addendum корректно ссылается на родительский PRD (§5 Non-Goals, Глоссарий, FR-5).</li>
+    <li>Assumptions Index: отсутствует.</li>
+    <li>UJ protagonist naming: UJ-N1..N3 не формализованы.</li>
+    <li>Glossary drift: «Исполнитель» (концепт) vs «Исполнитель (роль, не-ADMIN)».</li>
+    <li>Open Questions density: 10 OQ — допустимо для draft, но 3 затрагивают базовые BP.</li>
+    <li>OQ-5 не помечен как BLOCKER для downstream.</li>
+  </ul>
+</div>
+
+<footer class="report-footer">
+  <div class="meta">
+    <span>Rubric: .opencode/skills/bmad-prd@1.0/assets/prd-validation-checklist.md</span>
+    <span>Generated: 2026-07-23T12:00:00Z</span>
+  </div>
+</footer>
+</div>
+</body>
+</html>
