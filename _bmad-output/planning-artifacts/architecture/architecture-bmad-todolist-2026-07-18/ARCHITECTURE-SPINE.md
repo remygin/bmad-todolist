@@ -7,7 +7,7 @@ paradigm: 'layered REST API + component SPA'
 scope: 'Full-system brownfield: auth, boards, columns, cards, FE SPA, deploy envelope'
 status: final
 created: '2026-07-18'
-updated: '2026-07-18'
+updated: '2026-07-22'
 binds: ['FR-1','FR-2','FR-3','FR-4','FR-5','FR-6','FR-7','FR-8','FR-9','FR-10','FR-11','FR-12','FR-13','FR-14','FR-15']
 sources:
   - '_bmad-output/planning-artifacts/prds/prd-bmad-todolist-2026-07-18/prd.md'
@@ -88,7 +88,7 @@ flowchart LR
 
 - **Binds:** FR-11–FR-14; SM-2
 - **Prevents:** two writers of `Card.position`/`Card.status`; dual FE sync policies treated as optional
-- **Rule:** Only `CardService` mutates Card rows (`title`, `description`, `status`, `position`). Server normalizes `position` after create/move/delete. Move payload is `targetStatus` + `targetIndex` (0..size after removing the moving card). `BoardService.configureColumns` must not write Card rows. Card drag-and-drop uses `@dnd-kit` with mouse, touch, and keyboard via the drag-handle. FE: create/update/delete card and board/column saves apply the successful API payload (or reload board) into local state; **move** uses optimistic local order with rollback on error and does **not** re-apply the move response. After full board reload, UI shows server order. `[ASSUMPTION: move stays optimistic until an explicit sync story; PRD as-is overrides project-context “always sync from move response”.]`
+- **Rule:** Only `CardService` mutates Card rows (`title`, `description`, `status`, `position`, `creator`, `assignee`). Server normalizes `position` after create/move/delete. Move payload is `targetStatus` + `targetIndex` (0..size after removing the moving card). `BoardService.configureColumns` must not write Card rows. Card drag-and-drop uses `@dnd-kit` with mouse, touch, and keyboard via the drag-handle. FE: create/update/delete card and board/column saves apply the successful API payload (or reload board) into local state; **move** uses optimistic local order with rollback on error and does **not** re-apply the move response. After full board reload, UI shows server order. `CardService` — исключительный writer полей `creator` и `assignee`. Creator устанавливается однократно при create и не изменяется. Assignee мутируется через create/update; moveCard не меняет assignee. `[ASSUMPTION: move stays optimistic until an explicit sync story; PRD as-is overrides project-context “always sync from move response”.]`
 
 ### AD-7 — Schema ownership `[ADOPTED]`
 
@@ -100,7 +100,7 @@ flowchart LR
 
 - **Binds:** all `/api` responses; FE `ApiError`
 - **Prevents:** ad-hoc error JSON; duplicated DTO type definitions; status synonym drift
-- **Rule:** Errors use `{ "message": string, "details": string[] }` via `ApiExceptionHandler`. HTTP codes: 400/401/403/404/409 as today. Backend DTOs are nested records in `*Dtos` with Bean Validation. `CardResponse` is defined only in `CardDtos`; any mapper (including board read assembly) must emit the same fields. FE contract types live beside functions in `frontend/src/api/*`. Field maxima: board name 120, column name 80, card title 200, description 4000.
+- **Rule:** Errors use `{ "message": string, "details": string[] }` via `ApiExceptionHandler`. HTTP codes: 400/401/403/404/409 as today. Backend DTOs are nested records in `*Dtos` with Bean Validation. `CardResponse` is defined only in `CardDtos`; any mapper (including board read assembly) must emit the same fields. FE contract types live beside functions in `frontend/src/api/*`. Field maxima: board name 120, column name 80, card title 200, description 4000. Сборка CardResponse — через единый метод `CardResponse.from(Card)` (или `CardMapper`). BoardService и любые потребители делегируют этому методу, не дублируя конструктор. Новый эндпоинт `GET /api/users` возвращает `[{id, username}]`.
 
 ### AD-9 — Frontend HTTP single path `[ADOPTED]`
 
@@ -125,7 +125,7 @@ flowchart LR
 
 - **Binds:** board/card packages; FR-5–FR-14
 - **Prevents:** two owners of Card writes; BoardService vs CardService fighting over the same rows
-- **Rule:** **Board** is the Kanban aggregate root for ownership and locking. **CardService** is the exclusive writer of Card entities. **BoardService** owns Board and BoardColumn writes and assembles the Board read model (may read `CardRepository`). Do not introduce a second Card write path from BoardService or Controllers.
+- **Rule:** **Board** is the Kanban aggregate root for ownership and locking. **CardService** is the exclusive writer of Card entities. **BoardService** owns Board and BoardColumn writes and assembles the Board read model (may read `CardRepository`). Do not introduce a second Card write path from BoardService or Controllers. `GET /api/users` в пакете `user/` — read-only; не нарушает aggregate boundaries.
 
 ### AD-12 — Board read-model composition `[ADOPTED]`
 
@@ -198,6 +198,8 @@ erDiagram
   CARD {
     string status
     int position
+    bigint creator_id    # FK → users(id), NOT NULL
+    bigint assignee_id   # FK → users(id), nullable
   }
 ```
 
@@ -211,13 +213,14 @@ erDiagram
 | Cards CRUD + move (FR-11–14) | `card/`, `components/kanban` | AD-5, AD-6, AD-8, AD-9, AD-11, AD-12 |
 | Health (FR-15) | Actuator + nginx/Vite proxy | AD-10 |
 | Error UX / ApiError | `common/`, `api/client.ts` | AD-8, AD-9 |
+| Просмотр пользователей (assignee picker) | `user/`, `api/users.ts` | AD-3, AD-8, AD-11 |
 
 ## Deferred
 
 - CI/CD workflows — not present; add only under an explicit ops task.
 - Narrowing CORS from `*` — current `*` is **frozen by AD-10** until a dedicated security task; not a silent epic choice.
 - Server-side token revoke / mid-session global 401 handler — not in as-is product.
-- Unifying BoardService/CardService CardResponse mapping into one shared function — type is single (`CardDtos`); extract helper only when touching both mappers.
+- ~~Unifying BoardService/CardService CardResponse mapping into one shared function — type is single (`CardDtos`); extract helper only when touching both mappers.~~ _(resolved in feature delta 2026-07-22: единый метод `CardResponse.from(Card)` введён)_
 - Syncing FE board state from successful **move** response — desired in `project-context.md`, not current code; change only with an explicit story.
 - Multi-user roles, custom statuses, export/backup, rich card fields — Non-Goals; out of this spine.
 - Provider/cloud topology beyond Compose — self-hosted Compose is the envelope; no cloud binding.
