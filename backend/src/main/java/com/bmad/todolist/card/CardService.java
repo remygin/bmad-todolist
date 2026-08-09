@@ -10,6 +10,7 @@ import com.bmad.todolist.card.CardDtos.MoveCardRequest;
 import com.bmad.todolist.card.CardDtos.UpdateCardRequest;
 import com.bmad.todolist.common.BadRequestException;
 import com.bmad.todolist.common.ResourceNotFoundException;
+import com.bmad.todolist.user.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -20,10 +21,12 @@ public class CardService {
 
 	private final CardRepository cardRepository;
 	private final BoardRepository boardRepository;
+	private final UserRepository userRepository;
 
-	public CardService(CardRepository cardRepository, BoardRepository boardRepository) {
+	public CardService(CardRepository cardRepository, BoardRepository boardRepository, UserRepository userRepository) {
 		this.cardRepository = cardRepository;
 		this.boardRepository = boardRepository;
+		this.userRepository = userRepository;
 	}
 
 	@Transactional
@@ -35,9 +38,10 @@ public class CardService {
 				normalizeTitle(request.title()),
 				normalizeDescription(request.description()),
 				request.status(),
-				position
+				position,
+				principal.getUser()
 		));
-		return toResponse(card);
+		return CardResponse.from(card);
 	}
 
 	@Transactional
@@ -46,7 +50,7 @@ public class CardService {
 		findOwnedBoardForUpdate(boardId, principal.getId());
 		Card card = findOwnedCard(id, principal.getId());
 		card.update(normalizeTitle(request.title()), normalizeDescription(request.description()));
-		return toResponse(card);
+		return CardResponse.from(card);
 	}
 
 	@Transactional
@@ -76,7 +80,7 @@ public class CardService {
 			cardRepository.saveAll(source);
 			cardRepository.saveAll(target);
 		}
-		return toResponse(card);
+		return CardResponse.from(card);
 	}
 
 	@Transactional
@@ -135,16 +139,4 @@ public class CardService {
 		return description.trim();
 	}
 
-	private CardResponse toResponse(Card card) {
-		return new CardResponse(
-				card.getId(),
-				card.getBoard().getId(),
-				card.getTitle(),
-				card.getDescription(),
-				card.getStatus(),
-				card.getPosition(),
-				card.getCreatedAt(),
-				card.getUpdatedAt()
-		);
-	}
 }

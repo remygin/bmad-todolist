@@ -1,11 +1,11 @@
 {
   "workflow_version": "1.2.0",
   "timestamps": {
-    "started": "2026-07-18T13:39:59+03:00",
-    "last_updated": "2026-07-18T13:45:00+03:00",
-    "completed": "2026-07-18T13:45:00+03:00"
+    "started": "2026-07-22T22:54:58+0300",
+    "last_updated": "2026-07-22T22:58:30+0300",
+    "completed": "2026-07-22T22:58:30+0300"
   },
-  "mode": "initial_scan",
+  "mode": "full_rescan",
   "scan_level": "deep",
   "project_root": "/Users/remygin/Projects/bmad-todolist",
   "project_knowledge": "/Users/remygin/Projects/bmad-todolist/docs",
@@ -13,73 +13,73 @@
     {
       "step": "step_1",
       "status": "completed",
-      "timestamp": "2026-07-18T13:42:30+03:00",
-      "summary": "Классифицирован как multi-part с 2 частями: frontend (web), backend (backend)"
+      "timestamp": "2026-07-22T22:56:00+0300",
+      "summary": "Классифицирован как multi-part с 3 частями: frontend (web), backend (backend), autotests (library)"
     },
     {
       "step": "step_2",
       "status": "completed",
-      "timestamp": "2026-07-18T13:42:45+03:00",
-      "summary": "Найдено 2 существующих docs (README.md, frontend/README.md); доп. контекст: none"
+      "timestamp": "2026-07-22T22:56:30+0300",
+      "summary": "Найдены docs/* + README.md, frontend/README.md, project-context.md; фокус пользователя: каталог autotests"
     },
     {
       "step": "step_3",
       "status": "completed",
-      "timestamp": "2026-07-18T13:43:21+03:00",
-      "summary": "Tech stack: React/Vite + Spring Boot 4 / Java 17 / PostgreSQL"
+      "timestamp": "2026-07-22T22:56:45+0300",
+      "summary": "Tech stack: React/Vite + Spring Boot 4 / Java 17 + autotests Rest Assured/Selenide"
     },
     {
       "step": "step_4",
       "status": "completed",
-      "timestamp": "2026-07-18T13:43:40+03:00",
-      "summary": "Условный анализ: 12 API endpoints, 6 таблиц, UI-компоненты kanban, JWT auth"
+      "timestamp": "2026-07-22T22:57:00+0300",
+      "summary": "Условный анализ: API/data/UI без изменений контракта; новая часть autotests задокументирована"
     },
     {
       "step": "step_5",
       "status": "completed",
-      "timestamp": "2026-07-18T13:43:45+03:00",
-      "summary": "Дерево исходников задокументировано"
+      "timestamp": "2026-07-22T22:57:15+0300",
+      "summary": "Дерево исходников обновлено: добавлен autotests/"
     },
     {
       "step": "step_6",
       "status": "completed",
-      "timestamp": "2026-07-18T13:43:50+03:00",
-      "summary": "Dev/deployment guides написаны"
+      "timestamp": "2026-07-22T22:57:30+0300",
+      "summary": "Dev/deployment guides: уровни тестов и команда mvn test в autotests"
     },
     {
       "step": "step_7",
       "status": "completed",
-      "timestamp": "2026-07-18T13:43:55+03:00",
-      "summary": "Архитектура интеграции: REST+JWT, Vite/nginx proxy, JDBC"
+      "timestamp": "2026-07-22T22:57:40+0300",
+      "summary": "Интеграция: Rest Assured→backend, Selenide→frontend"
     },
     {
       "step": "step_8",
       "status": "completed",
-      "timestamp": "2026-07-18T13:44:05+03:00",
-      "summary": "Architecture docs для 2 частей"
+      "timestamp": "2026-07-22T22:57:55+0300",
+      "summary": "Architecture docs: новый architecture-autotests.md; backend testing section уточнён"
     },
     {
       "step": "step_9",
       "status": "completed",
-      "timestamp": "2026-07-18T13:44:20+03:00",
-      "summary": "Supporting docs написаны"
+      "timestamp": "2026-07-22T22:58:10+0300",
+      "summary": "Supporting docs + project-parts.json (3 parts) + project-context Testing Rules"
     },
     {
       "step": "step_10",
       "status": "completed",
-      "timestamp": "2026-07-18T13:44:31+03:00",
-      "summary": "Master index сгенерирован"
+      "timestamp": "2026-07-22T22:58:20+0300",
+      "summary": "Master index обновлён под 3 части"
     },
     {
       "step": "step_11",
       "status": "completed",
-      "timestamp": "2026-07-18T13:45:00+03:00",
-      "summary": "Валидация и review завершены (пользователь: done)"
+      "timestamp": "2026-07-22T22:58:25+0300",
+      "summary": "Валидация: нет маркеров _(To be generated)_; API/data/FE inventory без rescan изменений контракта"
     },
     {
       "step": "step_12",
       "status": "completed",
-      "timestamp": "2026-07-18T13:45:00+03:00",
+      "timestamp": "2026-07-22T22:58:30+0300",
       "summary": "Workflow complete"
     }
   ],
@@ -87,17 +87,19 @@
   "findings": {
     "project_classification": {
       "repository_type": "multi-part",
-      "parts_count": 2,
-      "primary_tech": "React/Vite + Spring Boot"
+      "parts_count": 3,
+      "primary_tech": "React/Vite + Spring Boot + Java E2E"
     },
     "technology_stack": {
       "frontend": "React 18 + TypeScript + Vite 5",
-      "backend": "Java 17 + Spring Boot 4 + PostgreSQL"
+      "backend": "Java 17 + Spring Boot 4 + PostgreSQL",
+      "autotests": "Java 17 + JUnit 5 + Rest Assured + Selenide"
     },
     "conditional_analysis": {
-      "apis": "12 endpoints",
-      "tables": 6,
-      "components": "pages + kanban + auth"
+      "apis": "12 endpoints (unchanged)",
+      "tables": "Flyway V1–V2",
+      "components": "pages + kanban + auth",
+      "e2e": "HealthApiTest, AuthApiTest, LoginUiTest smoke"
     }
   },
   "project_types": [
@@ -112,22 +114,28 @@
       "project_type_id": "backend",
       "display_name": "Backend (Spring Boot)",
       "root_path": "/Users/remygin/Projects/bmad-todolist/backend"
+    },
+    {
+      "part_id": "autotests",
+      "project_type_id": "library",
+      "display_name": "Autotests (Selenide + Rest Assured)",
+      "root_path": "/Users/remygin/Projects/bmad-todolist/autotests"
     }
   ],
   "outputs_generated": [
     "project-scan-report.json",
-    "api-contracts-backend.md",
-    "data-models-backend.md",
+    "architecture-autotests.md",
     "source-tree-analysis.md",
     "integration-architecture.md",
     "architecture-backend.md",
-    "architecture-frontend.md",
     "project-overview.md",
-    "component-inventory-frontend.md",
     "development-guide.md",
     "deployment-guide.md",
     "project-parts.json",
     "index.md"
+  ],
+  "related_updates": [
+    "_bmad-output/project-context.md"
   ],
   "resume_instructions": "Workflow завершён"
 }

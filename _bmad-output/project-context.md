@@ -1,7 +1,7 @@
 ---
 project_name: 'bmad-todolist'
 user_name: 'remygin'
-date: '2026-07-18'
+date: '2026-07-22'
 sections_completed:
   [
     'technology_stack',
@@ -28,7 +28,8 @@ _This file contains critical rules and patterns that AI agents must follow when 
 
 - Backend: Java 17 (не повышать/понижать), Spring Boot 4.0.x (НЕ даунгрейдить на 3.x), JJWT 0.12.x, Spring Data JPA, Flyway, PostgreSQL 16
 - Frontend: React 18.3, TypeScript ~5.6 strict, Vite 5.4, react-router-dom 6.30, @dnd-kit; HTTP только через `fetch` в `frontend/src/api/client.ts` (не axios/React Query)
-- Тесты backend: JUnit 5 + MockMvc, H2 профиль `test` с `MODE=PostgreSQL`; схема через Flyway + `ddl-auto=validate`
+- Тесты backend (unit/IT): JUnit 5 + MockMvc, H2 профиль `test` с `MODE=PostgreSQL`; схема через Flyway + `ddl-auto=validate`
+- E2E автотесты: отдельный каталог `autotests/` — Java 17, JUnit 5, Rest Assured (API), Selenide (UI); не смешивать с `backend/src/test`
 - Локальные порты: backend часто `SERVER_PORT=8081` (default в yml — 8080); Vite 5173 проксирует `/api` и `/actuator` → `localhost:8081`
 - Node 20+; prod frontend — nginx, проксирует `/api` на backend
 
@@ -72,6 +73,8 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - Обязательные сценарии kanban при касании домена: 3 колонки, duplicate board name, move + порядок, доступ чужой доски
 - Unit-тесты service допустимы для чистой логики, но не вместо MockMvc-IT для новых endpoint
 - Frontend: не подключать Jest/Vitest/Playwright без отдельной задачи; gate — `npm run lint` и `npm run build`
+- E2E (живые API/UI) — только в `autotests/` (Rest Assured / Selenide); не добавлять E2E в `backend/src/test` и не тащить Selenide в Spring-модуль
+- Конфиг стенда E2E — `autotests/src/test/resources/autotest.properties` (defaults `:5173` / `:8081`); override через env/`-D`; при недоступном стенде — `assumeTrue`, не жёсткий fail инициализации
 
 ### Code Quality & Style Rules
 
@@ -89,7 +92,7 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - Два режима портов: локально Vite proxy `/api` → `localhost:8081` (`SERVER_PORT=8081`); Docker Compose backend обычно `:8080`. Не «унифицировать» порты, ломая proxy
 - JDBC: native run часто `localhost`; compose — хост `db` из example. Не ломать один сценарий ради другого
 - Изменение `/api` — вместе backend + `frontend/src/api` (+ IT); желательно синхронизировать `docs/api-contracts-backend.md`
-- Перед сдачей: `backend` → `mvn test`; `frontend` → `npm run lint` && `npm run build`
+- Перед сдачей: `backend` → `mvn test`; `frontend` → `npm run lint` && `npm run build`; при E2E-изменениях — `autotests` → `mvn test` на поднятом стенде
 - Коммиты краткие в духе репо (`Add ...` / `Fix ...`); не добавлять CI/CD и branch-policy «заодно»
 
 ### Critical Don't-Miss Rules
@@ -118,4 +121,4 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - Обновлять при смене стека или инвариантов домена
 - Периодически вычищать правила, ставшие очевидными
 
-Last Updated: 2026-07-18
+Last Updated: 2026-07-22

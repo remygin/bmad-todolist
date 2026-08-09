@@ -16,6 +16,14 @@
       "root_path": "backend",
       "entry_points": ["backend/src/main/java/com/bmad/todolist/TodolistApplication.java"],
       "architecture_doc": "architecture-backend.md"
+    },
+    {
+      "part_id": "autotests",
+      "project_type_id": "library",
+      "display_name": "Autotests (Selenide + Rest Assured)",
+      "root_path": "autotests",
+      "entry_points": ["autotests/pom.xml"],
+      "architecture_doc": "architecture-autotests.md"
     }
   ],
   "integration_points": [
@@ -30,6 +38,18 @@
       "to": "postgresql",
       "type": "JDBC/JPA",
       "details": "Flyway migrations V1–V2"
+    },
+    {
+      "from": "autotests",
+      "to": "backend",
+      "type": "HTTP (Rest Assured)",
+      "details": "Direct api.baseUrl (default http://localhost:8081); smoke: /actuator/health, /api/auth/login"
+    },
+    {
+      "from": "autotests",
+      "to": "frontend",
+      "type": "Browser (Selenide)",
+      "details": "ui.baseUrl (default http://localhost:5173); smoke: /login form"
     }
   ]
 }

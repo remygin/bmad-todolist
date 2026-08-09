@@ -38,7 +38,13 @@ Env (см. `.env.example` / compose):
 
 ## CI/CD
 
-Пайплайнов в `.github/workflows` нет. Рекомендуется: `mvn test`, `npm run lint` + `npm run build` перед merge.
+Пайплайнов в `.github/workflows` нет. Рекомендуется перед merge:
+
+1. `cd backend && mvn test` — unit/IT (H2)
+2. `cd frontend && npm run lint && npm run build`
+3. (опционально, при поднятом стенде) `cd autotests && mvn test` — E2E API/UI
+
+`autotests` не входит в Docker Compose — это отдельный клиент к уже запущенному стеку.
 
 ## Безопасность при деплое
 

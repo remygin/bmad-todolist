@@ -171,7 +171,7 @@ public class BoardService {
 		Map<ColumnStatus, List<CardResponse>> cardsByStatus = cardRepository
 				.findAllByBoardIdOrderByStatusAscPositionAsc(board.getId())
 				.stream()
-				.map(this::toCardResponse)
+				.map(CardResponse::from)
 				.collect(java.util.stream.Collectors.groupingBy(CardResponse::status));
 
 		List<ColumnResponse> columns = columnRepository.findAllByBoardIdOrderByPosition(board.getId()).stream()
@@ -195,16 +195,4 @@ public class BoardService {
 		);
 	}
 
-	private CardResponse toCardResponse(Card card) {
-		return new CardResponse(
-				card.getId(),
-				card.getBoard().getId(),
-				card.getTitle(),
-				card.getDescription(),
-				card.getStatus(),
-				card.getPosition(),
-				card.getCreatedAt(),
-				card.getUpdatedAt()
-		);
-	}
 }

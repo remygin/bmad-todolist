@@ -8,7 +8,8 @@ Kanban-приложение на Spring Boot + React с JWT-аутентифик
 - **Backend:** Java 17, Spring Boot 4, Spring Security, JPA, Flyway, JWT
 - **Frontend:** React 18 + TypeScript + Vite 5 + `@dnd-kit`
 - **БД:** PostgreSQL (приложение), H2 (автотесты)
-- **Автотесты:** JUnit 5 + MockMvc
+- **Unit/IT:** JUnit 5 + MockMvc (`backend`)
+- **E2E автотесты:** Java 17, JUnit 5, Rest Assured (API), Selenide (UI) — каталог `autotests`
 
 > На локальной машине проекта используется Java 17 (Spring Boot 4 её поддерживает). Docker Compose описан в репозитории; для полного стека нужен установленный Docker.
 
@@ -63,6 +64,8 @@ docker compose up --build
 
 ## Автотесты
 
+### Unit / интеграционные (в коде)
+
 ```bash
 cd backend
 mvn test
@@ -72,7 +75,21 @@ npm run lint
 npm run build
 ```
 
-Тесты используют профиль `test` и in-memory H2 — PostgreSQL не требуется.
+Backend-тесты используют профиль `test` и in-memory H2 — PostgreSQL не требуется.
+
+### E2E (`autotests/`)
+
+Отдельный Maven-проект: API (Rest Assured) и UI (Selenide). Нужен поднятый стенд.
+
+```bash
+# локально: backend :8081, frontend :5173
+cd autotests
+mvn test
+# или: ./mvnw test (если wrapper jar доступен)
+```
+
+URL и креды — в `autotests/src/test/resources/autotest.properties` (или `API_BASE_URL` / `UI_BASE_URL` / `ADMIN_*`).  
+Если стенд недоступен, smoke-тесты пропускаются (`assumeTrue`), а не падают.
 
 ## API
 
